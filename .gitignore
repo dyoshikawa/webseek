@@ -7,3 +7,6 @@ coverage/
 # devcontainer-local / pnpm artifacts
 .pnpm-store/
 tmp/
+
+# rulesync local-only rule overrides
+.rulesync/rules/overview.local.md

@@ -43,6 +43,9 @@ jobs:
 
       - name: Run cicheck
         run: pnpm cicheck
-      # Add once websearch has a build:
-      # - name: Build
-      #   run: pnpm build
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run e2e tests
+        run: pnpm test:e2e

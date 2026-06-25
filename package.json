@@ -2,7 +2,16 @@
   "name": "websearch",
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "websearch": "./dist/src/cli/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/cli/index.js",
+    "dev": "tsx src/cli/index.ts",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
     "oxlint": "oxlint . --max-warnings 0",
@@ -12,7 +21,8 @@
     "secretlint": "secretlint --secretlintignore .gitignore \"**/*\"",
     "check": "pnpm run fmt:check && pnpm run oxlint && pnpm run typecheck",
     "fix": "pnpm run fmt && pnpm run oxlint:fix",
-    "test": "vitest run --silent=true",
+    "test": "vitest run --config vitest.config.ts --silent=true",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts --silent=false",
     "cicheck:code": "pnpm run check && pnpm run test",
     "cicheck:content": "pnpm run cspell && pnpm run secretlint",
     "cicheck": "pnpm run cicheck:code && pnpm run cicheck:content",
@@ -26,6 +36,7 @@
   "devDependencies": {
     "@secretlint/secretlint-rule-preset-recommend": "13.0.2",
     "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^26.0.0",
     "cspell": "10.0.1",
     "lint-staged": "17.0.7",
     "oxfmt": "0.55.0",
@@ -33,7 +44,13 @@
     "rulesync": "^8.31.0",
     "secretlint": "13.0.2",
     "simple-git-hooks": "2.13.1",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "commander": "^15.0.0",
+    "zod": "^4.4.3"
   }
 }

@@ -1,0 +1,70 @@
+/**
+ * Shared helpers for end-to-end tests.
+ *
+ * E2E tests drive the real CLI the way a user would: by spawning it as a child
+ * process. By default the CLI source is run via `tsx`; set `WEBSEARCH_CMD` to a
+ * built binary path to test the compiled output instead.
+ */
+
+import { execFile } from "node:child_process";
+import { join } from "node:path";
+import { promisify } from "node:util";
+
+const originalCwd = process.cwd();
+
+export const execFileAsync = promisify(execFile);
+
+const tsxPath = join(originalCwd, "node_modules", ".bin", "tsx");
+const cliPath = join(originalCwd, "src", "cli", "index.ts");
+
+export const websearchCmd = process.env.WEBSEARCH_CMD
+  ? join(originalCwd, process.env.WEBSEARCH_CMD)
+  : tsxPath;
+export const websearchArgs = process.env.WEBSEARCH_CMD ? [] : [cliPath];
+
+/** A process environment with all `undefined` values removed. */
+export function cleanEnv(overrides: Record<string, string> = {}): Record<string, string> {
+  const base: Record<string, string> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (value !== undefined) {
+      base[key] = value;
+    }
+  }
+  return { ...base, ...overrides };
+}
+
+export interface RunCliResult {
+  stdout: string;
+  stderr: string;
+  code: number;
+}
+
+interface ExecError extends Error {
+  stdout?: string;
+  stderr?: string;
+  code?: number;
+}
+
+/** Run the CLI with the given args, capturing stdout/stderr and the exit code. */
+export async function runCli(params: {
+  args: string[];
+  env?: Record<string, string>;
+}): Promise<RunCliResult> {
+  try {
+    const { stdout, stderr } = await execFileAsync(
+      websearchCmd,
+      [...websearchArgs, ...params.args],
+      {
+        env: cleanEnv(params.env),
+      },
+    );
+    return { stdout, stderr, code: 0 };
+  } catch (error) {
+    const execError = error as ExecError;
+    return {
+      stdout: execError.stdout ?? "",
+      stderr: execError.stderr ?? "",
+      code: typeof execError.code === "number" ? execError.code : 1,
+    };
+  }
+}

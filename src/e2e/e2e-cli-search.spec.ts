@@ -19,7 +19,7 @@ describe("E2E: CLI search", () => {
 
   it("google: prints normalized SERP results as JSON", async () => {
     const { stdout, code } = await runCli({
-      args: ["search", "typescript", "--provider", "google", "--json"],
+      args: ["typescript", "--provider", "google", "--json"],
       env: {
         GOOGLE_API_KEY: "test-key",
         GOOGLE_CSE_CX: "test-cx",
@@ -34,7 +34,7 @@ describe("E2E: CLI search", () => {
 
   it("openai: prints a grounded answer with citations", async () => {
     const { stdout, code } = await runCli({
-      args: ["search", "latest news", "-p", "openai", "--json"],
+      args: ["latest news", "-p", "openai", "--json"],
       env: { OPENAI_API_KEY: "sk-test", WEBSEEK_OPENAI_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
@@ -45,7 +45,7 @@ describe("E2E: CLI search", () => {
 
   it("gemini (gemini-api): prints a grounded answer", async () => {
     const { stdout, code } = await runCli({
-      args: ["search", "euro 2024", "-p", "gemini", "--json"],
+      args: ["euro 2024", "-p", "gemini", "--json"],
       env: { GEMINI_API_KEY: "g-key", WEBSEEK_GEMINI_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
@@ -54,7 +54,7 @@ describe("E2E: CLI search", () => {
 
   it("gemini (vertex-express): prints a grounded answer", async () => {
     const { stdout, code } = await runCli({
-      args: ["search", "euro 2024", "-p", "gemini", "--gemini-backend", "vertex-express", "--json"],
+      args: ["euro 2024", "-p", "gemini", "--gemini-backend", "vertex-express", "--json"],
       env: { VERTEX_API_KEY: "v-key", WEBSEEK_VERTEX_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
@@ -63,7 +63,7 @@ describe("E2E: CLI search", () => {
 
   it("prints a clear error and a non-zero exit code when credentials are missing", async () => {
     const { stderr, code } = await runCli({
-      args: ["search", "q", "-p", "openai"],
+      args: ["q", "-p", "openai"],
       env: { OPENAI_API_KEY: "" },
     });
     expect(code).not.toBe(0);

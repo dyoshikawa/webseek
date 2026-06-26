@@ -9,10 +9,10 @@ describe("E2E: version", () => {
     expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
-  it("lists the search and mcp commands in --help", async () => {
+  it("shows the query usage and the mcp command in --help", async () => {
     const { stdout, code } = await runCli({ args: ["--help"] });
     expect(code).toBe(0);
-    expect(stdout).toContain("search");
+    expect(stdout).toContain("query");
     expect(stdout).toContain("mcp");
   });
 });

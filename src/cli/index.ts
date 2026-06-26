@@ -3,8 +3,8 @@
  * webseek CLI entry point.
  *
  * Two modes:
- *   webseek search <query> --provider <name>   run a one-off web search
- *   webseek mcp                                start the MCP server (stdio)
+ *   webseek <query> --provider <name>   run a one-off web search (root command)
+ *   webseek mcp                         start the MCP server (stdio)
  */
 
 import { readFileSync } from "node:fs";

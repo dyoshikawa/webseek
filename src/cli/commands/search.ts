@@ -1,6 +1,7 @@
 /**
- * `webseek search <query...>` — run a web search via a provider and print
- * the result (text by default, normalized JSON with --json).
+ * `webseek <query...>` — run a web search via a provider and print the result
+ * (text by default, normalized JSON with --json). Search is the root command;
+ * there is no `search` subcommand.
  */
 
 import type { Command } from "commander";
@@ -65,12 +66,14 @@ export async function runSearchCommand(params: {
   params.logger.result(formatResult({ result, json: Boolean(params.options.json) }));
 }
 
+/**
+ * Configure the root program to run a web search. Search has no dedicated
+ * subcommand — `webseek "<query>" -p <provider>` is the primary invocation.
+ */
 export function registerSearchCommand(program: Command): void {
   program
-    .command("search")
-    .description("Search the web via a provider")
-    .argument("<query...>", "the search query")
-    .requiredOption("-p, --provider <name>", "provider: openai | google | gemini")
+    .argument("[query...]", "the search query")
+    .option("-p, --provider <name>", "provider: openai | google | gemini")
     .option("-n, --max-results <number>", "desired number of results (SERP providers)")
     .option("-m, --model <name>", "model override (openai, gemini)")
     .option("--gemini-backend <backend>", "gemini backend: gemini-api | vertex-express")

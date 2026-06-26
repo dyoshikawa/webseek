@@ -23,7 +23,7 @@ express mode** (`vertex-express`).
 
 ```bash
 npm install -g webseek      # install the CLI globally
-npx webseek search "..." -p google   # or run without installing
+npx webseek "..." -p google   # or run without installing
 ```
 
 ### Build from source
@@ -39,10 +39,10 @@ the TypeScript source through `tsx`).
 ## CLI mode
 
 ```bash
-webseek search <query...> --provider <openai|google|gemini> [options]
+webseek <query...> --provider <openai|google|gemini> [options]
 ```
 
-Options for `search`:
+Options:
 
 | Flag                    | Description                                 |
 | ----------------------- | ------------------------------------------- |
@@ -56,9 +56,9 @@ Options for `search`:
 Examples:
 
 ```bash
-webseek search "best static site generators 2026" -p google -n 5
-webseek search "summarize the latest TypeScript release" -p openai
-webseek search "who won euro 2024" -p gemini --gemini-backend vertex-express --json
+webseek "best static site generators 2026" -p google -n 5
+webseek "summarize the latest TypeScript release" -p openai
+webseek "who won euro 2024" -p gemini --gemini-backend vertex-express --json
 ```
 
 ## MCP server mode

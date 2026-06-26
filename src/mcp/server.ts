@@ -17,7 +17,7 @@ export interface StartMcpServerParams {
 }
 
 export async function startMcpServer(params: StartMcpServerParams): Promise<void> {
-  const server = new McpServer({ name: "websearch", version: params.version });
+  const server = new McpServer({ name: "webseek", version: params.version });
 
   const tool = createWebSearchTool();
   server.registerTool(tool.name, tool.config, tool.handler);
@@ -25,5 +25,5 @@ export async function startMcpServer(params: StartMcpServerParams): Promise<void
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  params.logger.info("websearch MCP server started (stdio)");
+  params.logger.info("webseek MCP server started (stdio)");
 }

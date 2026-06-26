@@ -2,12 +2,12 @@
  * Consistent error formatting for the CLI.
  *
  * Provider calls fail in predictable ways (missing credentials, auth rejected,
- * quota exhausted, malformed responses). `WebsearchError` carries a stable
+ * quota exhausted, malformed responses). `WebseekError` carries a stable
  * `code` so the CLI can map failures to exit codes and a clear message, while
  * `formatError` renders any thrown value into a single human-readable string.
  */
 
-export type WebsearchErrorCode =
+export type WebseekErrorCode =
   | "missing_config"
   | "auth_failed"
   | "rate_limited"
@@ -15,18 +15,18 @@ export type WebsearchErrorCode =
   | "invalid_response"
   | "invalid_usage";
 
-export interface WebsearchErrorOptions {
-  code: WebsearchErrorCode;
+export interface WebseekErrorOptions {
+  code: WebseekErrorCode;
   message: string;
   cause?: unknown;
 }
 
-export class WebsearchError extends Error {
-  readonly code: WebsearchErrorCode;
+export class WebseekError extends Error {
+  readonly code: WebseekErrorCode;
 
-  constructor(options: WebsearchErrorOptions) {
+  constructor(options: WebseekErrorOptions) {
     super(options.message, { cause: options.cause });
-    this.name = "WebsearchError";
+    this.name = "WebseekError";
     this.code = options.code;
   }
 }
@@ -36,7 +36,7 @@ export class WebsearchError extends Error {
  * any other failure.
  */
 export function errorExitCode(error: unknown): number {
-  if (error instanceof WebsearchError) {
+  if (error instanceof WebseekError) {
     return error.code === "invalid_usage" ? 2 : 1;
   }
   return 1;
@@ -44,7 +44,7 @@ export function errorExitCode(error: unknown): number {
 
 /** Render any thrown value into a single-line, user-facing message. */
 export function formatError(error: unknown): string {
-  if (error instanceof WebsearchError) {
+  if (error instanceof WebseekError) {
     return `[${error.code}] ${error.message}`;
   }
   if (error instanceof Error) {

@@ -23,7 +23,7 @@ describe("E2E: CLI search", () => {
       env: {
         GOOGLE_API_KEY: "test-key",
         GOOGLE_CSE_CX: "test-cx",
-        WEBSEARCH_GOOGLE_BASE_URL: mock.url,
+        WEBSEEK_GOOGLE_BASE_URL: mock.url,
       },
     });
     expect(code).toBe(0);
@@ -35,7 +35,7 @@ describe("E2E: CLI search", () => {
   it("openai: prints a grounded answer with citations", async () => {
     const { stdout, code } = await runCli({
       args: ["search", "latest news", "-p", "openai", "--json"],
-      env: { OPENAI_API_KEY: "sk-test", WEBSEARCH_OPENAI_BASE_URL: mock.url },
+      env: { OPENAI_API_KEY: "sk-test", WEBSEEK_OPENAI_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
     const result = JSON.parse(stdout);
@@ -46,7 +46,7 @@ describe("E2E: CLI search", () => {
   it("gemini (gemini-api): prints a grounded answer", async () => {
     const { stdout, code } = await runCli({
       args: ["search", "euro 2024", "-p", "gemini", "--json"],
-      env: { GEMINI_API_KEY: "g-key", WEBSEARCH_GEMINI_BASE_URL: mock.url },
+      env: { GEMINI_API_KEY: "g-key", WEBSEEK_GEMINI_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
     expect(JSON.parse(stdout).answer).toBe("Mock Gemini answer.");
@@ -55,7 +55,7 @@ describe("E2E: CLI search", () => {
   it("gemini (vertex-express): prints a grounded answer", async () => {
     const { stdout, code } = await runCli({
       args: ["search", "euro 2024", "-p", "gemini", "--gemini-backend", "vertex-express", "--json"],
-      env: { VERTEX_API_KEY: "v-key", WEBSEARCH_VERTEX_BASE_URL: mock.url },
+      env: { VERTEX_API_KEY: "v-key", WEBSEEK_VERTEX_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
     expect(JSON.parse(stdout).answer).toBe("Mock Gemini answer.");

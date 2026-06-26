@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to websearch!
+Thanks for your interest in contributing to webseek!
 
 ## Development
 

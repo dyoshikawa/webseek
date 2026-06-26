@@ -10,7 +10,7 @@
 import { z } from "zod";
 
 import type { OpenAIConfig } from "../config/env.js";
-import { WebsearchError } from "../utils/error.js";
+import { WebseekError } from "../utils/error.js";
 import type { Citation, NormalizedSearchResult, SearchParams, SearchProvider } from "./provider.js";
 
 const PATH = "/v1/responses";
@@ -130,16 +130,16 @@ interface ToErrorParams {
   body: unknown;
 }
 
-function toError(params: ToErrorParams): WebsearchError {
+function toError(params: ToErrorParams): WebseekError {
   const parsed = responseSchema.safeParse(params.body);
   const message =
     (parsed.success ? parsed.data.error?.message : undefined) ??
     `OpenAI web search request failed (HTTP ${params.status}).`;
   if (params.status === 401) {
-    return new WebsearchError({ code: "auth_failed", message });
+    return new WebseekError({ code: "auth_failed", message });
   }
   if (params.status === 429) {
-    return new WebsearchError({ code: "rate_limited", message });
+    return new WebseekError({ code: "rate_limited", message });
   }
-  return new WebsearchError({ code: "provider_error", message });
+  return new WebseekError({ code: "provider_error", message });
 }

@@ -1,5 +1,5 @@
 /**
- * Shared types and the provider interface for the websearch CLI.
+ * Shared types and the provider interface for the webseek CLI.
  *
  * Web search providers fall into two categories that this schema normalizes:
  * - SERP-style providers (e.g. Google Custom Search) return a ranked list of

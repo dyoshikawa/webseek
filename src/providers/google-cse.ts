@@ -12,7 +12,7 @@
 import { z } from "zod";
 
 import type { GoogleCseConfig } from "../config/env.js";
-import { WebsearchError } from "../utils/error.js";
+import { WebseekError } from "../utils/error.js";
 import type { NormalizedSearchResult, SearchParams, SearchProvider } from "./provider.js";
 
 const PATH = "/customsearch/v1";
@@ -126,16 +126,16 @@ interface ToErrorParams {
   body: unknown;
 }
 
-function toError(params: ToErrorParams): WebsearchError {
+function toError(params: ToErrorParams): WebseekError {
   const message =
     extractMessage(params.body) ?? `Google Custom Search request failed (HTTP ${params.status}).`;
   if (params.status === 401 || params.status === 403) {
-    return new WebsearchError({ code: "auth_failed", message });
+    return new WebseekError({ code: "auth_failed", message });
   }
   if (params.status === 429) {
-    return new WebsearchError({ code: "rate_limited", message });
+    return new WebseekError({ code: "rate_limited", message });
   }
-  return new WebsearchError({ code: "provider_error", message });
+  return new WebseekError({ code: "provider_error", message });
 }
 
 function extractMessage(body: unknown): string | undefined {

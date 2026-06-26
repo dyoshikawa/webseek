@@ -1,5 +1,5 @@
 /**
- * `websearch search <query...>` — run a web search via a provider and print
+ * `webseek search <query...>` — run a web search via a provider and print
  * the result (text by default, normalized JSON with --json).
  */
 
@@ -13,7 +13,7 @@ import {
   runSearch,
 } from "../../lib/search.js";
 import { formatResult } from "../../output/format.js";
-import { WebsearchError } from "../../utils/error.js";
+import { WebseekError } from "../../utils/error.js";
 import type { Logger } from "../../utils/logger.js";
 import { wrapCommand } from "../wrap-command.js";
 
@@ -36,7 +36,7 @@ export function toSearchRequest(params: {
 }): Omit<RunSearchParams, "env" | "fetchImpl"> {
   const query = params.queryParts.join(" ").trim();
   if (!query) {
-    throw new WebsearchError({ code: "invalid_usage", message: "Missing search query." });
+    throw new WebseekError({ code: "invalid_usage", message: "Missing search query." });
   }
 
   return {

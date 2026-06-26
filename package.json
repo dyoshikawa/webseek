@@ -1,9 +1,9 @@
 {
-  "name": "websearch",
+  "name": "webseek",
   "version": "0.0.0",
   "type": "module",
   "bin": {
-    "websearch": "./dist/src/cli/index.js"
+    "webseek": "./dist/src/cli/index.js"
   },
   "files": [
     "dist"

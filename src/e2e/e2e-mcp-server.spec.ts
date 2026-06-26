@@ -6,7 +6,7 @@ import {
   type MockProviderServer,
   startMockProviderServer,
 } from "../test-utils/mock-provider-server.js";
-import { cleanEnv, websearchArgs, websearchCmd } from "./e2e-helper.js";
+import { cleanEnv, webseekArgs, webseekCmd } from "./e2e-helper.js";
 
 describe("E2E: MCP server", () => {
   let mock: MockProviderServer;
@@ -16,11 +16,11 @@ describe("E2E: MCP server", () => {
   beforeAll(async () => {
     mock = await startMockProviderServer();
     transport = new StdioClientTransport({
-      command: websearchCmd,
-      args: [...websearchArgs, "mcp"],
-      env: cleanEnv({ GEMINI_API_KEY: "g-key", WEBSEARCH_GEMINI_BASE_URL: mock.url }),
+      command: webseekCmd,
+      args: [...webseekArgs, "mcp"],
+      env: cleanEnv({ GEMINI_API_KEY: "g-key", WEBSEEK_GEMINI_BASE_URL: mock.url }),
     });
-    client = new Client({ name: "websearch-e2e", version: "0.0.0" });
+    client = new Client({ name: "webseek-e2e", version: "0.0.0" });
     await client.connect(transport);
   });
 

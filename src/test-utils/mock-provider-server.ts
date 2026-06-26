@@ -2,7 +2,7 @@
  * A local HTTP server that imitates the provider endpoints, so e2e tests can
  * exercise the real CLI/MCP binaries (spawned as child processes) without any
  * network access or API keys. Point a provider's base URL at this server via
- * the `WEBSEARCH_*_BASE_URL` environment variables.
+ * the `WEBSEEK_*_BASE_URL` environment variables.
  */
 
 import { createServer, type Server } from "node:http";

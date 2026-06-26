@@ -2,7 +2,7 @@
  * Shared helpers for end-to-end tests.
  *
  * E2E tests drive the real CLI the way a user would: by spawning it as a child
- * process. By default the CLI source is run via `tsx`; set `WEBSEARCH_CMD` to a
+ * process. By default the CLI source is run via `tsx`; set `WEBSEEK_CMD` to a
  * built binary path to test the compiled output instead.
  */
 
@@ -17,10 +17,10 @@ export const execFileAsync = promisify(execFile);
 const tsxPath = join(originalCwd, "node_modules", ".bin", "tsx");
 const cliPath = join(originalCwd, "src", "cli", "index.ts");
 
-export const websearchCmd = process.env.WEBSEARCH_CMD
-  ? join(originalCwd, process.env.WEBSEARCH_CMD)
+export const webseekCmd = process.env.WEBSEEK_CMD
+  ? join(originalCwd, process.env.WEBSEEK_CMD)
   : tsxPath;
-export const websearchArgs = process.env.WEBSEARCH_CMD ? [] : [cliPath];
+export const webseekArgs = process.env.WEBSEEK_CMD ? [] : [cliPath];
 
 /** A process environment with all `undefined` values removed. */
 export function cleanEnv(overrides: Record<string, string> = {}): Record<string, string> {
@@ -51,13 +51,9 @@ export async function runCli(params: {
   env?: Record<string, string>;
 }): Promise<RunCliResult> {
   try {
-    const { stdout, stderr } = await execFileAsync(
-      websearchCmd,
-      [...websearchArgs, ...params.args],
-      {
-        env: cleanEnv(params.env),
-      },
-    );
+    const { stdout, stderr } = await execFileAsync(webseekCmd, [...webseekArgs, ...params.args], {
+      env: cleanEnv(params.env),
+    });
     return { stdout, stderr, code: 0 };
   } catch (error) {
     const execError = error as ExecError;

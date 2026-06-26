@@ -1,4 +1,4 @@
-# websearch
+# webseek
 
 Web search using the API keys of multiple providers behind a single, unified
 interface. Bring whichever provider key you already have and search the web —
@@ -7,7 +7,7 @@ or agent (**MCP server mode**). Both modes share the same core search logic.
 
 ## Providers
 
-`websearch` normalizes two fundamentally different kinds of "web search":
+`webseek` normalizes two fundamentally different kinds of "web search":
 
 | Provider | Kind                                        | Output                           |
 | -------- | ------------------------------------------- | -------------------------------- |
@@ -23,7 +23,7 @@ express mode** (`vertex-express`).
 
 ```bash
 pnpm install
-pnpm build      # emits dist/, exposes the `websearch` bin
+pnpm build      # emits dist/, exposes the `webseek` bin
 ```
 
 During development you can run without building via `pnpm dev -- <args>` (runs
@@ -32,7 +32,7 @@ the TypeScript source through `tsx`).
 ## CLI mode
 
 ```bash
-websearch search <query...> --provider <openai|google|gemini> [options]
+webseek search <query...> --provider <openai|google|gemini> [options]
 ```
 
 Options for `search`:
@@ -49,9 +49,9 @@ Options for `search`:
 Examples:
 
 ```bash
-websearch search "best static site generators 2026" -p google -n 5
-websearch search "summarize the latest TypeScript release" -p openai
-websearch search "who won euro 2024" -p gemini --gemini-backend vertex-express --json
+webseek search "best static site generators 2026" -p google -n 5
+webseek search "summarize the latest TypeScript release" -p openai
+webseek search "who won euro 2024" -p gemini --gemini-backend vertex-express --json
 ```
 
 ## MCP server mode
@@ -60,7 +60,7 @@ Start a [Model Context Protocol](https://modelcontextprotocol.io) server over
 stdio that exposes a single `web_search` tool:
 
 ```bash
-websearch mcp
+webseek mcp
 ```
 
 Register it with an MCP client, e.g.:
@@ -68,8 +68,8 @@ Register it with an MCP client, e.g.:
 ```jsonc
 {
   "mcpServers": {
-    "websearch": {
-      "command": "websearch",
+    "webseek": {
+      "command": "webseek",
       "args": ["mcp"],
       "env": { "GEMINI_API_KEY": "..." },
     },

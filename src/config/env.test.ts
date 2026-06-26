@@ -17,7 +17,7 @@ describe("env config resolution", () => {
   it("allows overriding a provider base URL via env", () => {
     expect(
       resolveOpenAIConfig({
-        env: { OPENAI_API_KEY: "sk", WEBSEARCH_OPENAI_BASE_URL: "http://localhost:1234/" },
+        env: { OPENAI_API_KEY: "sk", WEBSEEK_OPENAI_BASE_URL: "http://localhost:1234/" },
       }).baseUrl,
     ).toBe("http://localhost:1234");
   });

@@ -1,5 +1,5 @@
 /**
- * `websearch mcp` — start the MCP server over stdio.
+ * `webseek mcp` — start the MCP server over stdio.
  */
 
 import type { Command } from "commander";

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * websearch CLI entry point.
+ * webseek CLI entry point.
  *
  * Two modes:
- *   websearch search <query> --provider <name>   run a one-off web search
- *   websearch mcp                                start the MCP server (stdio)
+ *   webseek search <query> --provider <name>   run a one-off web search
+ *   webseek mcp                                start the MCP server (stdio)
  */
 
 import { readFileSync } from "node:fs";
@@ -22,7 +22,7 @@ function readPackageVersion(dir: string): string | undefined {
       name?: string;
       version?: string;
     };
-    return pkg.name === "websearch" ? pkg.version : undefined;
+    return pkg.name === "webseek" ? pkg.version : undefined;
   } catch {
     return undefined;
   }
@@ -45,7 +45,7 @@ function buildProgram(): Command {
   const version = getVersion();
 
   program
-    .name("websearch")
+    .name("webseek")
     .description("Unified multi-provider web search (CLI + MCP server)")
     .version(version, "-v, --version", "Show version");
 

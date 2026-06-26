@@ -9,7 +9,7 @@ import { createGeminiProvider } from "../providers/gemini.js";
 import { createGoogleCseProvider } from "../providers/google-cse.js";
 import { createOpenAIProvider } from "../providers/openai.js";
 import type { NormalizedSearchResult, ProviderName } from "../providers/provider.js";
-import { WebsearchError } from "../utils/error.js";
+import { WebseekError } from "../utils/error.js";
 
 export const PROVIDER_NAMES = ["openai", "google", "gemini"] as const;
 export const GEMINI_BACKENDS = ["gemini-api", "vertex-express"] as const;
@@ -30,7 +30,7 @@ export function coerceProvider(value: unknown): ProviderName {
   if (typeof value === "string" && (PROVIDER_NAMES as readonly string[]).includes(value)) {
     return value as ProviderName;
   }
-  throw new WebsearchError({
+  throw new WebseekError({
     code: "invalid_usage",
     message: `Invalid provider. Choose one of: ${PROVIDER_NAMES.join(", ")}.`,
   });
@@ -41,7 +41,7 @@ export function coerceGeminiBackend(value: unknown): GeminiBackend {
   if (typeof value === "string" && (GEMINI_BACKENDS as readonly string[]).includes(value)) {
     return value as GeminiBackend;
   }
-  throw new WebsearchError({
+  throw new WebseekError({
     code: "invalid_usage",
     message: `Invalid gemini backend. Choose one of: ${GEMINI_BACKENDS.join(", ")}.`,
   });
@@ -51,7 +51,7 @@ export function coerceGeminiBackend(value: unknown): GeminiBackend {
 export function coerceMaxResults(value: unknown): number {
   const parsed = typeof value === "number" ? value : Number.parseInt(String(value), 10);
   if (!Number.isInteger(parsed) || parsed < 1) {
-    throw new WebsearchError({
+    throw new WebseekError({
       code: "invalid_usage",
       message: "max-results must be a positive integer.",
     });
@@ -84,7 +84,7 @@ function resolveProvider(params: RunSearchParams) {
         }),
       });
     default:
-      throw new WebsearchError({
+      throw new WebseekError({
         code: "invalid_usage",
         message: `Unknown provider: ${String(params.provider)}`,
       });

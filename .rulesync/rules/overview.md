@@ -11,7 +11,7 @@ cursor:
 
 # Project Overview
 
-<!-- TODO: one-paragraph description of what webseek is. -->
+<!-- TODO: one-paragraph description of what WebSeek is. -->
 
 - Read `README.md` and any docs under `docs/**/*.md` to understand the project.
 - Manage runtimes and package managers with `mise.toml`.

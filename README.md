@@ -163,6 +163,7 @@ Publishing to npm is automated. To cut a new version:
 
 Publishing the release triggers
 [`.github/workflows/publish.yml`](.github/workflows/publish.yml), which verifies
-the tag matches `package.json` and runs `pnpm publish --provenance`. Configure
-the `NPM_TOKEN` repository secret (an npm automation token) once before the first
-automated publish.
+the tag matches `package.json` and runs `pnpm publish`. Authentication uses npm
+**trusted publishing** (OIDC) — no token secret is required, and provenance is
+generated automatically. Configure the trusted publisher for the package once on
+npmjs.com, pointing it at this repository's `publish.yml` workflow.

@@ -45,6 +45,7 @@
     "modelcontextprotocol",
     "customsearch",
     "esbuild",
-    "tsdown"
+    "tsdown",
+    "npmjs"
   ]
 }

@@ -1,15 +1,16 @@
 ---
 name: draft-release
-description: "Prepare a new npm release: bump the version, open a release PR, and create a draft GitHub release. Publishing is automated by the Publish workflow once the draft release is published."
+description: "Prepare a new npm release: bump the version, open a release PR, and create a draft GitHub release. Publishing is automated by the Publish workflow once the release PR is merged into main."
 targets:
   - "*"
 ---
 
 # Draft Release
 
-Stage a release for `webseek`. The actual `npm publish` is performed
-automatically by `.github/workflows/publish.yml` when the draft GitHub release
-is published — this skill only prepares everything for the maintainer to review.
+Stage a release for `webseek`. Merging the release PR into `main` automatically
+runs `.github/workflows/publish.yml`, which publishes the package to npm and
+finalizes the GitHub release — this skill only prepares the release PR and a
+draft GitHub release for the maintainer to review and merge.
 
 ## Step 1: Sync main
 
@@ -53,12 +54,18 @@ Output the following for the maintainer:
 
 - The release PR URL.
 - The draft release URL.
-- The remaining manual steps:
+- The remaining manual step:
   1. Review and merge the release PR into `main`.
-  2. Open the draft release on GitHub and click **Publish release**.
-  3. The **Publish** workflow then runs `pnpm publish` automatically (it verifies the tag
-     matches `package.json` and publishes with provenance).
 
-**Important:** Do not publish the draft release before the PR is merged. The Publish
-workflow checks out the tagged commit and fails if its `package.json` version does not match
-the tag, so publishing early is safely rejected rather than shipping a wrong version.
+On merge, the **Publish** workflow runs automatically and, in a single job:
+verifies `package.json` matches the release tag, creates and pushes the
+`v${new_version}` tag, runs `pnpm publish` (npm trusted publishing via OIDC, with
+provenance), and flips the draft GitHub release to published. No manual "Publish
+release" click is needed.
+
+**Important:** Do not publish the draft release manually before the PR is merged —
+merging the PR handles publishing end to end. The workflow verifies the merged
+commit's `package.json` matches the tag, so a mismatched version is safely
+rejected rather than shipping the wrong version. If you ever need to publish a
+release whose PR was merged before this automation existed, run the **Publish**
+workflow via `workflow_dispatch` with the desired tag (e.g. `v${new_version}`).

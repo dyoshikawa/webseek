@@ -1,25 +1,68 @@
 name: Publish
 
-# Publishes the package to npm when a GitHub Release is published.
-# The draft release is prepared by the `draft-release` skill; a maintainer
-# reviews it and clicks "Publish release", which triggers this workflow.
+# Publishes the package to npm and finalizes the GitHub release automatically
+# when a release branch PR (prepared by the `draft-release` skill) is merged
+# into main. A `workflow_dispatch` trigger is provided as a manual escape hatch
+# (e.g. to publish a release whose PR was merged before this automation existed).
+#
+# The whole flow runs in a single job on purpose: publishing the draft release
+# with the default GITHUB_TOKEN does NOT emit a `release: published` event
+# (GitHub suppresses it to prevent recursive runs), so we cannot rely on a
+# separate release-triggered workflow to perform the npm publish.
 on:
-  release:
-    types: [published]
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v1.2.0). The version bump must already be merged into main and a draft release must exist."
+        required: true
+        type: string
 
 permissions:
-  contents: read
+  contents: write # create the release tag and publish the draft release
   id-token: write # required for npm trusted publishing (OIDC) + provenance
 
 jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
+    # On PR events, only run when a `release/v*` PR was actually merged (not
+    # merely closed). `workflow_dispatch` runs unconditionally.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'release/v'))
     steps:
-      - name: Checkout code
+      - name: Determine the release tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG_INPUT: ${{ inputs.tag }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            tag="$TAG_INPUT"
+          else
+            # Derive the tag from the release branch name (release/vX.Y.Z).
+            tag="${HEAD_REF#release/}"
+          fi
+          if ! echo "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid release tag: '$tag'"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the release commit
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.event.release.tag_name }}
+          # For a merged PR, pin to the exact merge commit so the tag never
+          # lands on a later commit if main advances between merge and run.
+          # For manual runs, fall back to main (which carries the version bump).
+          ref: ${{ github.event.pull_request.merge_commit_sha || 'main' }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup mise
         uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
@@ -31,14 +74,36 @@ jobs:
 
       - name: Verify version matches the release tag
         env:
-          TAG_NAME: ${{ github.event.release.tag_name }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
-          tag_version="${TAG_NAME#v}"
+          tag_version="${TAG#v}"
           pkg_version="$(node -p "require('./package.json').version")"
           if [ "$tag_version" != "$pkg_version" ]; then
             echo "::error::Release tag ($tag_version) does not match package.json ($pkg_version)."
-            echo "Merge the release PR into main before publishing the draft release."
+            echo "Merge the release PR into main before publishing."
             exit 1
+          fi
+
+      - name: Create and push the release tag
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          current_sha="$(git rev-parse HEAD)"
+          # Query both peeled (annotated) and plain (lightweight) refs so an
+          # existing tag resolves to its commit regardless of tag type.
+          remote_sha="$(git ls-remote --tags origin "refs/tags/${TAG}^{}" "refs/tags/${TAG}" \
+            | awk '$2 ~ /\^\{\}$/ {peeled=$1} $2 !~ /\^\{\}$/ {plain=$1} END {print (peeled ? peeled : plain)}')"
+          if [ -n "$remote_sha" ]; then
+            if [ "$remote_sha" != "$current_sha" ]; then
+              echo "::error::Tag $TAG already exists on origin at $remote_sha, not $current_sha."
+              exit 1
+            fi
+            echo "Tag $TAG already exists on origin at the release commit; skipping creation."
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
           fi
 
       # Authentication uses npm trusted publishing (OIDC) via the id-token
@@ -47,3 +112,9 @@ jobs:
       # package on npmjs.com (pointing at this repo's publish.yml workflow).
       - name: Publish to npm
         run: pnpm publish --no-git-checks
+
+      - name: Publish the prepared draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: gh release edit "$TAG" --draft=false --latest

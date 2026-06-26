@@ -12,13 +12,13 @@
     "gemini",
     "serp"
   ],
-  "homepage": "https://github.com/dyoshikawa/websearch#readme",
+  "homepage": "https://github.com/dyoshikawa/webseek#readme",
   "bugs": {
-    "url": "https://github.com/dyoshikawa/websearch/issues"
+    "url": "https://github.com/dyoshikawa/webseek/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dyoshikawa/websearch.git"
+    "url": "https://github.com/dyoshikawa/webseek.git"
   },
   "license": "MIT",
   "author": "dyoshikawa",

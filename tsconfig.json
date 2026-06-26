@@ -5,6 +5,6 @@
     "noUncheckedIndexedAccess": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "tsdown.config.ts"],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "tsdown.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

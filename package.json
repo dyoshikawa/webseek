@@ -77,6 +77,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@openrouter/sdk": "0.13.7",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.2",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^26.0.0",
@@ -84,6 +85,8 @@
     "lint-staged": "17.0.7",
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
+    "repomix": "1.14.1",
+    "resend": "6.14.0",
     "rulesync": "^8.31.0",
     "secretlint": "13.0.2",
     "simple-git-hooks": "2.13.1",

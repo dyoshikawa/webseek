@@ -46,6 +46,11 @@
     "customsearch",
     "esbuild",
     "tsdown",
-    "npmjs"
+    "npmjs",
+    "repomix",
+    "openrouter",
+    "resend",
+    "Referer",
+    "mkdtemp"
   ]
 }

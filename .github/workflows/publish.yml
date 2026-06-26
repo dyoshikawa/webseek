@@ -1,0 +1,49 @@
+name: Publish
+
+# Publishes the package to npm when a GitHub Release is published.
+# The draft release is prepared by the `draft-release` skill; a maintainer
+# reviews it and clicks "Publish release", which triggers this workflow.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup mise
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        with:
+          experimental: true
+
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
+      - name: Verify version matches the release tag
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          tag_version="${TAG_NAME#v}"
+          pkg_version="$(node -p "require('./package.json').version")"
+          if [ "$tag_version" != "$pkg_version" ]; then
+            echo "::error::Release tag ($tag_version) does not match package.json ($pkg_version)."
+            echo "Merge the release PR into main before publishing the draft release."
+            exit 1
+          fi
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+          pnpm publish --provenance --no-git-checks

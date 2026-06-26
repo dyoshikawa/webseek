@@ -151,3 +151,18 @@ src/
 pnpm cicheck      # format check, lint, typecheck, unit tests, spelling, secrets
 pnpm test:e2e     # end-to-end tests (CLI subprocess + MCP stdio client)
 ```
+
+## Releasing
+
+Publishing to npm is automated. To cut a new version:
+
+1. Run the `draft-release` skill — it bumps the version on a `release/vX.Y.Z`
+   branch, opens a PR, and creates a **draft** GitHub release.
+2. Review and merge the release PR into `main`.
+3. Open the draft release on GitHub and click **Publish release**.
+
+Publishing the release triggers
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml), which verifies
+the tag matches `package.json` and runs `pnpm publish --provenance`. Configure
+the `NPM_TOKEN` repository secret (an npm automation token) once before the first
+automated publish.

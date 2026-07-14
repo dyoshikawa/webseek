@@ -39,7 +39,7 @@ const outputItemSchema = z.looseObject({
 const responseSchema = z.looseObject({
   output: z.array(outputItemSchema).optional(),
   output_text: z.string().optional(),
-  error: z.looseObject({ message: z.string().optional() }).optional(),
+  error: z.looseObject({ message: z.string().optional() }).nullish(),
 });
 
 export interface OpenAIProviderParams {

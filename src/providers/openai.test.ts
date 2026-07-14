@@ -52,6 +52,31 @@ describe("openai provider", () => {
     expect(JSON.parse(String(init?.body)).tools).toEqual([{ type: "web_search" }]);
   });
 
+  it("parses a successful response that carries an explicit null error field", async () => {
+    // The Responses API returns `"error": null` on success. A schema that only
+    // accepts `undefined` (e.g. `.optional()`) rejects this and surfaces the
+    // parse failure as a bogus HTTP 200 provider error. Guard against that.
+    const fake = createFakeFetch([
+      {
+        body: {
+          error: null,
+          output: [
+            {
+              type: "message",
+              content: [{ type: "output_text", text: "Hi!" }],
+            },
+          ],
+        },
+      },
+    ]);
+    const provider = createOpenAIProvider({ config });
+
+    const result = await provider.search({ query: "hi", fetchImpl: fake.fetchImpl });
+
+    expect(result.answer).toBe("Hi!");
+    expect(result.citations).toEqual([]);
+  });
+
   it("maps 429 to a rate_limited error", async () => {
     const fake = createFakeFetch([{ status: 429, body: { error: { message: "slow down" } } }]);
     const provider = createOpenAIProvider({ config });

@@ -101,7 +101,7 @@ draft GitHub release public. No manual "Publish release" click is needed.
    ```bash
    gh run list --workflow "Publish" --branch "release/v<version>" \
      --limit 1 --json databaseId,status,conclusion,headBranch
-   gh run watch <run_id> --exit-status
+   gh run watch <run_id> --exit-status   # <run_id> is the databaseId above
    ```
 
    The workflow triggers on every closed PR to `main` (non-release runs are

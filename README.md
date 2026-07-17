@@ -159,11 +159,16 @@ Publishing to npm is automated. To cut a new version:
 1. Run the `draft-release` skill — it bumps the version on a `release/vX.Y.Z`
    branch, opens a PR, and creates a **draft** GitHub release.
 2. Review and merge the release PR into `main`.
-3. Open the draft release on GitHub and click **Publish release**.
 
-Publishing the release triggers
+Merging the release PR triggers
 [`.github/workflows/publish.yml`](.github/workflows/publish.yml), which verifies
-the tag matches `package.json` and runs `pnpm publish`. Authentication uses npm
-**trusted publishing** (OIDC) — no token secret is required, and provenance is
-generated automatically. Configure the trusted publisher for the package once on
-npmjs.com, pointing it at this repository's `publish.yml` workflow.
+the tag matches `package.json`, pushes the `vX.Y.Z` tag, runs `pnpm publish`, and
+flips the draft GitHub release public — no manual **Publish release** click is
+needed. Authentication uses npm **trusted publishing** (OIDC) — no token secret
+is required, and provenance is generated automatically. Configure the trusted
+publisher for the package once on npmjs.com, pointing it at this repository's
+`publish.yml` workflow.
+
+To run the whole flow in one shot, use the `/goal-release` command — it runs
+`/draft-release`, waits for the release PR's CI to pass, merges it with
+`/merge-pr`, and waits for the `Publish` workflow to finish.

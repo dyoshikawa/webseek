@@ -22,11 +22,19 @@ export const webseekCmd = process.env.WEBSEEK_CMD
   : tsxPath;
 export const webseekArgs = process.env.WEBSEEK_CMD ? [] : [cliPath];
 
-/** A process environment with all `undefined` values removed. */
+/** A process environment without inherited provider credentials or `undefined` values. */
+const providerCredentialEnvNames = new Set([
+  "OPENAI_API_KEY",
+  "GOOGLE_API_KEY",
+  "GOOGLE_CSE_CX",
+  "GEMINI_API_KEY",
+  "VERTEX_API_KEY",
+]);
+
 export function cleanEnv(overrides: Record<string, string> = {}): Record<string, string> {
   const base: Record<string, string> = {};
   for (const [key, value] of Object.entries(process.env)) {
-    if (value !== undefined) {
+    if (value !== undefined && !providerCredentialEnvNames.has(key)) {
       base[key] = value;
     }
   }

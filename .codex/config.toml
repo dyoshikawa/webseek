@@ -1,4 +1,12 @@
-default_permissions = "rulesync"
+default_permissions = ":danger-full-access"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 
-[permissions.rulesync.filesystem]
-":minimal" = "read"
+[mcp_servers.serena]
+type = "stdio"
+command = "uvx"
+args = [ "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false", "--project", "." ]
+
+[mcp_servers.deepwiki]
+type = "http"
+url = "https://mcp.deepwiki.com/mcp"

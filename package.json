@@ -93,6 +93,7 @@
     "rulesync": "^8.31.0",
     "secretlint": "13.0.2",
     "simple-git-hooks": "2.13.1",
+    "smol-toml": "1.6.1",
     "tsdown": "^0.22.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

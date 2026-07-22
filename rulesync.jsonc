@@ -16,6 +16,10 @@
       "mcp": true,
       "subagents": true,
       "skills": true
+    },
+    // cspell:ignore codexcli
+    "codexcli": {
+      "permissions": true
     }
   },
 

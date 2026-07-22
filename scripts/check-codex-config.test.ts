@@ -4,6 +4,18 @@ import { findCodexHardeningIssues } from "./check-codex-config.js";
 
 const pinnedSerenaSource =
   "git+https://github.com/oraios/serena@bcac0969fb8685783ea6d0f2642468fcc47e6395";
+const serenaArgs = [
+  "--from",
+  pinnedSerenaSource,
+  "serena",
+  "start-mcp-server",
+  "--context",
+  "ide-assistant",
+  "--enable-web-dashboard",
+  "false",
+  "--project",
+  ".",
+];
 
 const hardenedCodexConfig = `
 default_permissions = "rulesync"
@@ -11,17 +23,20 @@ approval_policy = "on-request"
 approvals_reviewer = "user"
 
 [mcp_servers.serena]
-args = ["--from", "${pinnedSerenaSource}", "serena"]
+args = ${JSON.stringify(serenaArgs)}
 
 [permissions.rulesync]
 extends = ":workspace"
+
+[permissions.rulesync.filesystem]
+":minimal" = "read"
 
 [permissions.rulesync.filesystem.":workspace_roots"]
 "." = "write"
 `;
 
 const rulesyncMcpConfig = JSON.stringify({
-  mcpServers: { serena: { args: ["--from", pinnedSerenaSource, "serena"] } },
+  mcpServers: { serena: { args: serenaArgs } },
 });
 
 const rulesyncPermissionsConfig = JSON.stringify({
@@ -83,11 +98,47 @@ describe("findCodexHardeningIssues", () => {
     );
   });
 
+  it("rejects a pinned decoy argument after a floating active source", () => {
+    const mcpConfig = JSON.stringify({
+      mcpServers: {
+        serena: {
+          args: ["--from", "git+https://github.com/oraios/serena", "--with", pinnedSerenaSource],
+        },
+      },
+    });
+
+    expect(validate({ mcpConfig })).toContain(
+      "Rulesync MCP source does not use the pinned Serena source",
+    );
+  });
+
   it("rejects a Rulesync permission source that can regenerate unsafe output", () => {
     const permissionsConfig = rulesyncPermissionsConfig.replace('".":"allow"', '".":"deny"');
 
     expect(validate({ permissionsConfig })).toContain(
       "Rulesync permissions source is not workspace-bounded",
+    );
+  });
+
+  it("rejects additional Rulesync permission grants", () => {
+    const permissionsConfig = JSON.stringify({
+      permission: { edit: { ".": "allow", "/": "allow" } },
+      codexcli: { base_permission_profile: ":workspace" },
+    });
+
+    expect(validate({ permissionsConfig })).toContain(
+      "Rulesync permissions source is not workspace-bounded",
+    );
+  });
+
+  it("rejects additional generated network access", () => {
+    const codexConfig = hardenedCodexConfig.replace(
+      'extends = ":workspace"',
+      'extends = ":workspace"\nnetwork = { enabled = true }',
+    );
+
+    expect(validate({ codexConfig })).toContain(
+      "Generated Codex permissions are not workspace-bounded and human-reviewed",
     );
   });
 });

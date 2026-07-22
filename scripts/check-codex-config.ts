@@ -7,6 +7,18 @@ import * as z from "zod/mini";
 
 const PINNED_SERENA_SOURCE =
   "git+https://github.com/oraios/serena@bcac0969fb8685783ea6d0f2642468fcc47e6395";
+const EXPECTED_SERENA_ARGS = [
+  "--from",
+  PINNED_SERENA_SOURCE,
+  "serena",
+  "start-mcp-server",
+  "--context",
+  "ide-assistant",
+  "--enable-web-dashboard",
+  "false",
+  "--project",
+  ".",
+] as const;
 
 const codexConfigSchema = z.looseObject({
   default_permissions: z.literal("rulesync"),
@@ -19,11 +31,30 @@ const codexConfigSchema = z.looseObject({
     rulesync: z.looseObject({
       extends: z.literal(":workspace"),
       filesystem: z.looseObject({
+        ":minimal": z.literal("read"),
         ":workspace_roots": z.looseObject({ ".": z.literal("write") }),
       }),
     }),
   }),
 });
+
+function hasExactKeys({
+  record,
+  keys,
+}: {
+  record: Record<string, unknown>;
+  keys: string[];
+}): boolean {
+  const actualKeys = Object.keys(record).toSorted();
+  return actualKeys.length === keys.length && actualKeys.every((key, index) => key === keys[index]);
+}
+
+function hasExpectedSerenaArgs({ args }: { args: string[] }): boolean {
+  return (
+    args.length === EXPECTED_SERENA_ARGS.length &&
+    args.every((argument, index) => argument === EXPECTED_SERENA_ARGS[index])
+  );
+}
 
 const rulesyncMcpSchema = z.looseObject({
   mcpServers: z.looseObject({
@@ -40,6 +71,33 @@ const rulesyncPermissionsSchema = z.looseObject({
   }),
 });
 
+function hasHardenedCodexPermissions({
+  data,
+}: {
+  data: z.infer<typeof codexConfigSchema>;
+}): boolean {
+  const profile = data.permissions.rulesync;
+  const filesystem = profile.filesystem;
+
+  return (
+    hasExactKeys({ record: profile, keys: ["extends", "filesystem"] }) &&
+    hasExactKeys({ record: filesystem, keys: [":minimal", ":workspace_roots"] }) &&
+    hasExactKeys({ record: filesystem[":workspace_roots"], keys: ["."] })
+  );
+}
+
+function hasHardenedRulesyncPermissions({
+  data,
+}: {
+  data: z.infer<typeof rulesyncPermissionsSchema>;
+}): boolean {
+  return (
+    hasExactKeys({ record: data.permission, keys: ["edit"] }) &&
+    hasExactKeys({ record: data.permission.edit, keys: ["."] }) &&
+    hasExactKeys({ record: data.codexcli, keys: ["base_permission_profile"] })
+  );
+}
+
 export function findCodexHardeningIssues({
   codexConfig,
   rulesyncMcpConfig,
@@ -53,9 +111,9 @@ export function findCodexHardeningIssues({
 
   try {
     const result = codexConfigSchema.safeParse(parseToml(codexConfig));
-    if (!result.success) {
+    if (!result.success || !hasHardenedCodexPermissions({ data: result.data })) {
       issues.push("Generated Codex permissions are not workspace-bounded and human-reviewed");
-    } else if (!result.data.mcp_servers.serena.args.includes(PINNED_SERENA_SOURCE)) {
+    } else if (!hasExpectedSerenaArgs({ args: result.data.mcp_servers.serena.args })) {
       issues.push("Generated Codex MCP config does not use the pinned Serena source");
     }
   } catch {
@@ -64,7 +122,7 @@ export function findCodexHardeningIssues({
 
   try {
     const result = rulesyncMcpSchema.safeParse(JSON.parse(rulesyncMcpConfig));
-    if (!result.success || !result.data.mcpServers.serena.args.includes(PINNED_SERENA_SOURCE)) {
+    if (!result.success || !hasExpectedSerenaArgs({ args: result.data.mcpServers.serena.args })) {
       issues.push("Rulesync MCP source does not use the pinned Serena source");
     }
   } catch {
@@ -72,7 +130,8 @@ export function findCodexHardeningIssues({
   }
 
   try {
-    if (!rulesyncPermissionsSchema.safeParse(JSON.parse(rulesyncPermissionsConfig)).success) {
+    const result = rulesyncPermissionsSchema.safeParse(JSON.parse(rulesyncPermissionsConfig));
+    if (!result.success || !hasHardenedRulesyncPermissions({ data: result.data })) {
       issues.push("Rulesync permissions source is not workspace-bounded");
     }
   } catch {

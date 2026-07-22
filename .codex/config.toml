@@ -1,4 +1,21 @@
 default_permissions = "rulesync"
+approval_policy = "on-request"
+approvals_reviewer = "user"
+
+[mcp_servers.serena]
+type = "stdio"
+command = "uvx"
+args = [ "--from", "git+https://github.com/oraios/serena@bcac0969fb8685783ea6d0f2642468fcc47e6395", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false", "--project", "." ]
+
+[mcp_servers.deepwiki]
+type = "http"
+url = "https://mcp.deepwiki.com/mcp"
+
+[permissions.rulesync]
+extends = ":workspace"
 
 [permissions.rulesync.filesystem]
 ":minimal" = "read"
+
+[permissions.rulesync.filesystem.":workspace_roots"]
+"." = "write"

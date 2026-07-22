@@ -19,6 +19,10 @@
     },
     // cspell:ignore codexcli
     "codexcli": {
+      "rules": true,
+      "commands": false,
+      "mcp": true,
+      "subagents": true,
       "permissions": true
     }
   },

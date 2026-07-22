@@ -4,7 +4,7 @@
   "targets": {
     "claudecode": {
       "rules": true,
-      "commands": true,
+      "commands": false,
       "mcp": true,
       "subagents": true,
       "skills": true,
@@ -12,9 +12,10 @@
     },
     "opencode": {
       "rules": true,
-      "commands": true,
+      "commands": false,
       "mcp": true,
-      "subagents": true
+      "subagents": true,
+      "skills": true
     }
   },
 
@@ -24,7 +25,6 @@
   "verbose": true,
   "silent": false,
 
-  "simulateCommands": true,
   "simulateSubagents": true,
   "simulateSkills": true,
 

@@ -169,6 +169,6 @@ is required, and provenance is generated automatically. Configure the trusted
 publisher for the package once on npmjs.com, pointing it at this repository's
 `publish.yml` workflow.
 
-To run the whole flow in one shot, use the `/goal-release` command — it runs
-`/draft-release`, waits for the release PR's CI to pass, merges it with
-`/merge-pr`, and waits for the `Publish` workflow to finish.
+To run the whole flow in one shot, use the `goal-release` skill — it runs the
+`draft-release` skill, waits for the release PR's CI to pass, merges it with the
+`merge-pr` skill, and waits for the `Publish` workflow to finish.

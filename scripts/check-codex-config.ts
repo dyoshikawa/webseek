@@ -25,7 +25,11 @@ const codexConfigSchema = z.looseObject({
   approval_policy: z.literal("on-request"),
   approvals_reviewer: z.literal("user"),
   mcp_servers: z.looseObject({
-    serena: z.looseObject({ args: z.array(z.string()) }),
+    serena: z.looseObject({
+      type: z.literal("stdio"),
+      command: z.literal("uvx"),
+      args: z.array(z.string()),
+    }),
   }),
   permissions: z.looseObject({
     rulesync: z.looseObject({
@@ -58,7 +62,12 @@ function hasExpectedSerenaArgs({ args }: { args: string[] }): boolean {
 
 const rulesyncMcpSchema = z.looseObject({
   mcpServers: z.looseObject({
-    serena: z.looseObject({ args: z.array(z.string()) }),
+    serena: z.looseObject({
+      type: z.literal("stdio"),
+      command: z.literal("uvx"),
+      args: z.array(z.string()),
+      env: z.looseObject({}),
+    }),
   }),
 });
 
@@ -80,9 +89,34 @@ function hasHardenedCodexPermissions({
   const filesystem = profile.filesystem;
 
   return (
+    !("sandbox_mode" in data) &&
+    !("sandbox_workspace_write" in data) &&
     hasExactKeys({ record: profile, keys: ["extends", "filesystem"] }) &&
     hasExactKeys({ record: filesystem, keys: [":minimal", ":workspace_roots"] }) &&
     hasExactKeys({ record: filesystem[":workspace_roots"], keys: ["."] })
+  );
+}
+
+function hasExpectedCodexSerenaServer({
+  server,
+}: {
+  server: z.infer<typeof codexConfigSchema>["mcp_servers"]["serena"];
+}): boolean {
+  return (
+    hasExactKeys({ record: server, keys: ["args", "command", "type"] }) &&
+    hasExpectedSerenaArgs({ args: server.args })
+  );
+}
+
+function hasExpectedRulesyncSerenaServer({
+  server,
+}: {
+  server: z.infer<typeof rulesyncMcpSchema>["mcpServers"]["serena"];
+}): boolean {
+  return (
+    hasExactKeys({ record: server, keys: ["args", "command", "env", "type"] }) &&
+    hasExactKeys({ record: server.env, keys: [] }) &&
+    hasExpectedSerenaArgs({ args: server.args })
   );
 }
 
@@ -113,7 +147,7 @@ export function findCodexHardeningIssues({
     const result = codexConfigSchema.safeParse(parseToml(codexConfig));
     if (!result.success || !hasHardenedCodexPermissions({ data: result.data })) {
       issues.push("Generated Codex permissions are not workspace-bounded and human-reviewed");
-    } else if (!hasExpectedSerenaArgs({ args: result.data.mcp_servers.serena.args })) {
+    } else if (!hasExpectedCodexSerenaServer({ server: result.data.mcp_servers.serena })) {
       issues.push("Generated Codex MCP config does not use the pinned Serena source");
     }
   } catch {
@@ -122,7 +156,10 @@ export function findCodexHardeningIssues({
 
   try {
     const result = rulesyncMcpSchema.safeParse(JSON.parse(rulesyncMcpConfig));
-    if (!result.success || !hasExpectedSerenaArgs({ args: result.data.mcpServers.serena.args })) {
+    if (
+      !result.success ||
+      !hasExpectedRulesyncSerenaServer({ server: result.data.mcpServers.serena })
+    ) {
       issues.push("Rulesync MCP source does not use the pinned Serena source");
     }
   } catch {

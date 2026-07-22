@@ -23,6 +23,8 @@ approval_policy = "on-request"
 approvals_reviewer = "user"
 
 [mcp_servers.serena]
+type = "stdio"
+command = "uvx"
 args = ${JSON.stringify(serenaArgs)}
 
 [permissions.rulesync]
@@ -36,7 +38,7 @@ extends = ":workspace"
 `;
 
 const rulesyncMcpConfig = JSON.stringify({
-  mcpServers: { serena: { args: serenaArgs } },
+  mcpServers: { serena: { type: "stdio", command: "uvx", args: serenaArgs, env: {} } },
 });
 
 const rulesyncPermissionsConfig = JSON.stringify({
@@ -87,6 +89,14 @@ describe("findCodexHardeningIssues", () => {
     );
   });
 
+  it("rejects a legacy full-access sandbox override", () => {
+    const codexConfig = `sandbox_mode = "danger-full-access"\n${hardenedCodexConfig}`;
+
+    expect(validate({ codexConfig })).toContain(
+      "Generated Codex permissions are not workspace-bounded and human-reviewed",
+    );
+  });
+
   it("rejects a floating Serena source in Rulesync", () => {
     const mcpConfig = rulesyncMcpConfig.replace(
       pinnedSerenaSource,
@@ -104,6 +114,30 @@ describe("findCodexHardeningIssues", () => {
         serena: {
           args: ["--from", "git+https://github.com/oraios/serena", "--with", pinnedSerenaSource],
         },
+      },
+    });
+
+    expect(validate({ mcpConfig })).toContain(
+      "Rulesync MCP source does not use the pinned Serena source",
+    );
+  });
+
+  it("rejects an unexpected Serena executable", () => {
+    const mcpConfig = JSON.stringify({
+      mcpServers: {
+        serena: { type: "stdio", command: "sh", args: serenaArgs, env: {} },
+      },
+    });
+
+    expect(validate({ mcpConfig })).toContain(
+      "Rulesync MCP source does not use the pinned Serena source",
+    );
+  });
+
+  it("rejects a Serena working-directory override", () => {
+    const mcpConfig = JSON.stringify({
+      mcpServers: {
+        serena: { type: "stdio", command: "uvx", args: serenaArgs, env: {}, cwd: "/" },
       },
     });
 

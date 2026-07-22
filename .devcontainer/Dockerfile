@@ -120,7 +120,9 @@ RUN curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/
 # Install global packages
 ENV PNPM_HOME=/home/node/.pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN mkdir -p "$PNPM_HOME"
+RUN mkdir -p "$PNPM_HOME" && \
+    mise exec -- pnpm add -g \
+    @google/gemini-cli
 
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash

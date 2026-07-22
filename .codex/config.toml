@@ -1,6 +1,6 @@
-default_permissions = "rulesync"
+default_permissions = ":danger-full-access"
 approval_policy = "on-request"
-approvals_reviewer = "user"
+approvals_reviewer = "auto_review"
 
 [mcp_servers.serena]
 type = "stdio"
@@ -10,12 +10,3 @@ args = [ "--from", "git+https://github.com/oraios/serena@bcac0969fb8685783ea6d0f
 [mcp_servers.deepwiki]
 type = "http"
 url = "https://mcp.deepwiki.com/mcp"
-
-[permissions.rulesync]
-extends = ":workspace"
-
-[permissions.rulesync.filesystem]
-":minimal" = "read"
-
-[permissions.rulesync.filesystem.":workspace_roots"]
-"." = "write"

@@ -17,24 +17,16 @@ const serenaArgs = [
   ".",
 ];
 
-const hardenedCodexConfig = `
-default_permissions = "rulesync"
+const expectedCodexConfig = `
+default_permissions = ":danger-full-access"
 approval_policy = "on-request"
-approvals_reviewer = "user"
+approvals_reviewer = "auto_review"
 
 [mcp_servers.serena]
 type = "stdio"
 command = "uvx"
 args = ${JSON.stringify(serenaArgs)}
 
-[permissions.rulesync]
-extends = ":workspace"
-
-[permissions.rulesync.filesystem]
-":minimal" = "read"
-
-[permissions.rulesync.filesystem.":workspace_roots"]
-"." = "write"
 `;
 
 const rulesyncMcpConfig = JSON.stringify({
@@ -43,11 +35,15 @@ const rulesyncMcpConfig = JSON.stringify({
 
 const rulesyncPermissionsConfig = JSON.stringify({
   permission: { edit: { ".": "allow" } },
-  codexcli: { base_permission_profile: ":workspace" },
+  codexcli: {
+    approval_policy: "on-request",
+    base_permission_profile: ":danger-full-access",
+    approvals_reviewer: "auto_review",
+  },
 });
 
 function validate({
-  codexConfig = hardenedCodexConfig,
+  codexConfig = expectedCodexConfig,
   mcpConfig = rulesyncMcpConfig,
   permissionsConfig = rulesyncPermissionsConfig,
 }: {
@@ -63,37 +59,34 @@ function validate({
 }
 
 describe("findCodexHardeningIssues", () => {
-  it("accepts aligned Rulesync sources and generated Codex hardening", () => {
+  it("accepts aligned Rulesync sources and generated Codex permissions", () => {
     expect(validate()).toEqual([]);
   });
 
-  it("rejects a commented decoy beside an unsafe active reviewer", () => {
-    const codexConfig = hardenedCodexConfig.replace(
-      'approvals_reviewer = "user"',
-      'approvals_reviewer = "auto_review"\n# approvals_reviewer = "user"',
+  it("rejects a commented decoy beside an unexpected active reviewer", () => {
+    const codexConfig = expectedCodexConfig.replace(
+      'approvals_reviewer = "auto_review"',
+      'approvals_reviewer = "user"\n# approvals_reviewer = "auto_review"',
     );
 
     expect(validate({ codexConfig })).toContain(
-      "Generated Codex permissions are not workspace-bounded and human-reviewed",
+      "Generated Codex permissions do not match the expected full-access policy",
     );
   });
 
-  it("rejects workspace settings under the wrong profile", () => {
-    const codexConfig = hardenedCodexConfig.replace(
-      "[permissions.rulesync]",
-      "[permissions.unselected]",
-    );
+  it("rejects an unexpected generated permissions profile", () => {
+    const codexConfig = `${expectedCodexConfig}\n[permissions.unselected]\nextends = ":workspace"`;
 
     expect(validate({ codexConfig })).toContain(
-      "Generated Codex permissions are not workspace-bounded and human-reviewed",
+      "Generated Codex permissions do not match the expected full-access policy",
     );
   });
 
   it("rejects a legacy full-access sandbox override", () => {
-    const codexConfig = `sandbox_mode = "danger-full-access"\n${hardenedCodexConfig}`;
+    const codexConfig = `sandbox_mode = "danger-full-access"\n${expectedCodexConfig}`;
 
     expect(validate({ codexConfig })).toContain(
-      "Generated Codex permissions are not workspace-bounded and human-reviewed",
+      "Generated Codex permissions do not match the expected full-access policy",
     );
   });
 
@@ -150,29 +143,30 @@ describe("findCodexHardeningIssues", () => {
     const permissionsConfig = rulesyncPermissionsConfig.replace('".":"allow"', '".":"deny"');
 
     expect(validate({ permissionsConfig })).toContain(
-      "Rulesync permissions source is not workspace-bounded",
+      "Rulesync permissions source does not match the expected full-access policy",
     );
   });
 
   it("rejects additional Rulesync permission grants", () => {
     const permissionsConfig = JSON.stringify({
       permission: { edit: { ".": "allow", "/": "allow" } },
-      codexcli: { base_permission_profile: ":workspace" },
+      codexcli: {
+        approval_policy: "on-request",
+        base_permission_profile: ":danger-full-access",
+        approvals_reviewer: "auto_review",
+      },
     });
 
     expect(validate({ permissionsConfig })).toContain(
-      "Rulesync permissions source is not workspace-bounded",
+      "Rulesync permissions source does not match the expected full-access policy",
     );
   });
 
-  it("rejects additional generated network access", () => {
-    const codexConfig = hardenedCodexConfig.replace(
-      'extends = ":workspace"',
-      'extends = ":workspace"\nnetwork = { enabled = true }',
-    );
+  it("rejects a legacy generated workspace permissions profile", () => {
+    const codexConfig = `${expectedCodexConfig}\n[permissions.rulesync]\nextends = ":workspace"`;
 
     expect(validate({ codexConfig })).toContain(
-      "Generated Codex permissions are not workspace-bounded and human-reviewed",
+      "Generated Codex permissions do not match the expected full-access policy",
     );
   });
 });

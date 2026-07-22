@@ -357,6 +357,11 @@ describe("generateOverallSummary", () => {
 
     expect(summary).toBe("重大な脆弱性が見つかりました。");
     expect(mockClient.chat.send).toHaveBeenCalledOnce();
+    expect(mockClient.chat.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatRequest: expect.objectContaining({ reasoning: { effort: "high" } }),
+      }),
+    );
   });
 
   it("should throw when no content returned", async () => {
@@ -459,6 +464,11 @@ describe("runSecurityScan", () => {
 
     expect(result).toEqual(scanResult);
     expect(mockClient.chat.send).toHaveBeenCalledOnce();
+    expect(mockClient.chat.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatRequest: expect.objectContaining({ reasoning: { effort: "high" } }),
+      }),
+    );
   });
 
   it("should throw when no content returned", async () => {

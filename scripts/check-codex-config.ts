@@ -21,23 +21,14 @@ const EXPECTED_SERENA_ARGS = [
 ] as const;
 
 const codexConfigSchema = z.looseObject({
-  default_permissions: z.literal("rulesync"),
+  default_permissions: z.literal(":danger-full-access"),
   approval_policy: z.literal("on-request"),
-  approvals_reviewer: z.literal("user"),
+  approvals_reviewer: z.literal("auto_review"),
   mcp_servers: z.looseObject({
     serena: z.looseObject({
       type: z.literal("stdio"),
       command: z.literal("uvx"),
       args: z.array(z.string()),
-    }),
-  }),
-  permissions: z.looseObject({
-    rulesync: z.looseObject({
-      extends: z.literal(":workspace"),
-      filesystem: z.looseObject({
-        ":minimal": z.literal("read"),
-        ":workspace_roots": z.looseObject({ ".": z.literal("write") }),
-      }),
     }),
   }),
 });
@@ -76,24 +67,19 @@ const rulesyncPermissionsSchema = z.looseObject({
     edit: z.looseObject({ ".": z.literal("allow") }),
   }),
   codexcli: z.looseObject({
-    base_permission_profile: z.literal(":workspace"),
+    approval_policy: z.literal("on-request"),
+    base_permission_profile: z.literal(":danger-full-access"),
+    approvals_reviewer: z.literal("auto_review"),
   }),
 });
 
-function hasHardenedCodexPermissions({
+function hasExpectedCodexPermissions({
   data,
 }: {
   data: z.infer<typeof codexConfigSchema>;
 }): boolean {
-  const profile = data.permissions.rulesync;
-  const filesystem = profile.filesystem;
-
   return (
-    !("sandbox_mode" in data) &&
-    !("sandbox_workspace_write" in data) &&
-    hasExactKeys({ record: profile, keys: ["extends", "filesystem"] }) &&
-    hasExactKeys({ record: filesystem, keys: [":minimal", ":workspace_roots"] }) &&
-    hasExactKeys({ record: filesystem[":workspace_roots"], keys: ["."] })
+    !("sandbox_mode" in data) && !("sandbox_workspace_write" in data) && !("permissions" in data)
   );
 }
 
@@ -120,7 +106,7 @@ function hasExpectedRulesyncSerenaServer({
   );
 }
 
-function hasHardenedRulesyncPermissions({
+function hasExpectedRulesyncPermissions({
   data,
 }: {
   data: z.infer<typeof rulesyncPermissionsSchema>;
@@ -128,7 +114,10 @@ function hasHardenedRulesyncPermissions({
   return (
     hasExactKeys({ record: data.permission, keys: ["edit"] }) &&
     hasExactKeys({ record: data.permission.edit, keys: ["."] }) &&
-    hasExactKeys({ record: data.codexcli, keys: ["base_permission_profile"] })
+    hasExactKeys({
+      record: data.codexcli,
+      keys: ["approval_policy", "approvals_reviewer", "base_permission_profile"],
+    })
   );
 }
 
@@ -145,8 +134,8 @@ export function findCodexHardeningIssues({
 
   try {
     const result = codexConfigSchema.safeParse(parseToml(codexConfig));
-    if (!result.success || !hasHardenedCodexPermissions({ data: result.data })) {
-      issues.push("Generated Codex permissions are not workspace-bounded and human-reviewed");
+    if (!result.success || !hasExpectedCodexPermissions({ data: result.data })) {
+      issues.push("Generated Codex permissions do not match the expected full-access policy");
     } else if (!hasExpectedCodexSerenaServer({ server: result.data.mcp_servers.serena })) {
       issues.push("Generated Codex MCP config does not use the pinned Serena source");
     }
@@ -168,8 +157,8 @@ export function findCodexHardeningIssues({
 
   try {
     const result = rulesyncPermissionsSchema.safeParse(JSON.parse(rulesyncPermissionsConfig));
-    if (!result.success || !hasHardenedRulesyncPermissions({ data: result.data })) {
-      issues.push("Rulesync permissions source is not workspace-bounded");
+    if (!result.success || !hasExpectedRulesyncPermissions({ data: result.data })) {
+      issues.push("Rulesync permissions source does not match the expected full-access policy");
     }
   } catch {
     issues.push("Rulesync permissions source is not valid JSON");

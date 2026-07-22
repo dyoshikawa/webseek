@@ -97,6 +97,7 @@ export const runSecurityScan = async ({
     chatRequest: {
       model,
       messages: [{ role: "user", content: `${prompt}\n\n${fileContent}` }],
+      reasoning: { effort: "high" },
       responseFormat: {
         type: "json_schema" as const,
         jsonSchema: {
@@ -166,6 +167,7 @@ export const generateOverallSummary = async ({
     chatRequest: {
       model,
       messages: [{ role: "user", content: `${OVERALL_SUMMARY_PROMPT}\n\n${input}` }],
+      reasoning: { effort: "high" },
       stream: false as const,
     },
     httpReferer: "https://github.com/dyoshikawa/webseek",

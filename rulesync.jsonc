@@ -22,6 +22,7 @@
       "rules": true,
       "commands": false,
       "mcp": true,
+      "skills": true,
       "subagents": true,
       "permissions": true
     }

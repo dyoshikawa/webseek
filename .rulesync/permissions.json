@@ -6,6 +6,8 @@
     }
   },
   "codexcli": {
-    "base_permission_profile": ":workspace"
+    "approval_policy": "on-request",
+    "base_permission_profile": ":danger-full-access",
+    "approvals_reviewer": "auto_review"
   }
 }

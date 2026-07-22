@@ -1,0 +1,4 @@
+default_permissions = "rulesync"
+
+[permissions.rulesync.filesystem]
+":minimal" = "read"

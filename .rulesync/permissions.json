@@ -1,7 +1,11 @@
 {
   "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/permissions-schema.json",
-  "permission": {},
+  "permission": {
+    "edit": {
+      ".": "allow"
+    }
+  },
   "codexcli": {
-    "base_permission_profile": ":danger-full-access"
+    "base_permission_profile": ":workspace"
   }
 }

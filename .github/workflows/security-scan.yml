@@ -19,12 +19,12 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup mise
-        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           experimental: true
 
       - name: Setup Takumi Guard npm registry
-        uses: flatt-security/setup-takumi-guard-npm@9a5d797c2085b6326d3a2985c08e3a114b9b88c1 # v1
+        uses: flatt-security/setup-takumi-guard-npm@6d4182745c1e474c35a023573c2612c085be45a4 # v1
 
       - name: Install dependencies
         run: pnpm install

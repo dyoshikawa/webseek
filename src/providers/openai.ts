@@ -10,8 +10,15 @@
 import { z } from "zod";
 
 import type { OpenAIConfig } from "../config/env.js";
+import { estimateCost } from "../pricing/pricing.js";
 import { WebseekError } from "../utils/error.js";
-import type { Citation, NormalizedSearchResult, SearchParams, SearchProvider } from "./provider.js";
+import type {
+  Citation,
+  NormalizedSearchResult,
+  SearchParams,
+  SearchProvider,
+  SearchUsage,
+} from "./provider.js";
 
 const PATH = "/v1/responses";
 const DEFAULT_MODEL = "gpt-5.5";
@@ -33,12 +40,21 @@ const contentSchema = z.looseObject({
 const outputItemSchema = z.looseObject({
   type: z.string().optional(),
   content: z.array(contentSchema).optional(),
-  action: z.looseObject({ query: z.string().optional() }).optional(),
+  action: z.looseObject({ type: z.string().optional(), query: z.string().optional() }).optional(),
+});
+
+const usageSchema = z.looseObject({
+  input_tokens: z.number().optional(),
+  input_tokens_details: z.looseObject({ cached_tokens: z.number().optional() }).nullish(),
+  output_tokens: z.number().optional(),
+  total_tokens: z.number().optional(),
 });
 
 const responseSchema = z.looseObject({
   output: z.array(outputItemSchema).optional(),
   output_text: z.string().optional(),
+  model: z.string().optional(),
+  usage: usageSchema.nullish(),
   error: z.looseObject({ message: z.string().optional() }).nullish(),
 });
 
@@ -74,7 +90,9 @@ export function createOpenAIProvider(params: OpenAIProviderParams): SearchProvid
         throw toError({ status: response.status, body });
       }
 
-      const { answer, citations, searchQueries } = extract(parsed.data);
+      const { answer, citations, searchQueries, searchCalls } = extract(parsed.data);
+      const servedModel = parsed.data.model ?? model;
+      const usage = toUsage({ usage: parsed.data.usage, searchCalls });
 
       return {
         provider: "openai",
@@ -83,6 +101,9 @@ export function createOpenAIProvider(params: OpenAIProviderParams): SearchProvid
         answer,
         citations,
         searchQueries,
+        model: servedModel,
+        usage,
+        cost: estimateCost({ provider: "openai", model: servedModel, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },
@@ -93,16 +114,21 @@ interface Extracted {
   answer: string;
   citations: Citation[];
   searchQueries: string[];
+  searchCalls: number;
 }
 
 function extract(data: z.infer<typeof responseSchema>): Extracted {
   const textParts: string[] = [];
   const citations: Citation[] = [];
   const searchQueries: string[] = [];
+  let searchCalls = 0;
 
   for (const item of data.output ?? []) {
-    if (item.type === "web_search_call" && item.action?.query) {
-      searchQueries.push(item.action.query);
+    if (item.type === "web_search_call") {
+      searchCalls += 1;
+      if (item.action?.query) {
+        searchQueries.push(item.action.query);
+      }
     }
     for (const content of item.content ?? []) {
       if (content.type === "output_text" && content.text) {
@@ -122,7 +148,23 @@ function extract(data: z.infer<typeof responseSchema>): Extracted {
   }
 
   const answer = textParts.length > 0 ? textParts.join("") : (data.output_text ?? "");
-  return { answer, citations, searchQueries };
+  return { answer, citations, searchQueries, searchCalls };
+}
+
+interface ToUsageParams {
+  usage: z.infer<typeof usageSchema> | null | undefined;
+  searchCalls: number;
+}
+
+function toUsage(params: ToUsageParams): SearchUsage {
+  const { usage } = params;
+  return {
+    inputTokens: usage?.input_tokens,
+    cachedInputTokens: usage?.input_tokens_details?.cached_tokens,
+    outputTokens: usage?.output_tokens,
+    totalTokens: usage?.total_tokens,
+    searchCalls: params.searchCalls,
+  };
 }
 
 interface ToErrorParams {

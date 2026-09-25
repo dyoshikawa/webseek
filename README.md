@@ -19,6 +19,37 @@ The Gemini provider supports two backends that share the same request/response
 shape: the **Gemini Developer API** (`gemini-api`, default) and **Vertex AI
 express mode** (`vertex-express`).
 
+### Usage and cost
+
+Every search reports what it consumed and an estimated cost in USD. The text
+output ends with a line such as:
+
+```
+Usage: 1,100 tokens (1,000 in, 100 out), 1 search, ~$0.0180
+```
+
+JSON output (and the MCP tool result) carries the same data as `usage` and
+`cost`, plus the `model` that served the search:
+
+```jsonc
+{
+  "model": "gpt-5.5",
+  "usage": { "inputTokens": 1000, "outputTokens": 100, "totalTokens": 1100, "searchCalls": 1 },
+  "cost": { "totalUsd": 0.018, "tokensUsd": 0.008, "searchUsd": 0.01 },
+}
+```
+
+- `usage.inputTokens` includes cached tokens (`usage.cachedInputTokens`) and the
+  search content the model read; `usage.outputTokens` includes reasoning/thinking
+  tokens. SERP providers (`google`) report no tokens.
+- `usage.searchCalls` counts OpenAI `web_search` calls, Gemini grounding queries,
+  or Google Custom Search requests (one per page of 10 results).
+- `cost` is computed from built-in list prices: token rates for the model plus
+  the provider's search fee (OpenAI $10 per 1k calls, Gemini 3.x $14 per 1k
+  queries, Gemini 2.5 $35 per 1k grounded prompts, Google Custom Search $5 per 1k
+  queries). Free allowances and discounts are **not** applied, so it is an upper
+  estimate, not your bill. `cost` is omitted when the model has no known price.
+
 ## Install
 
 ```bash
@@ -139,6 +170,7 @@ src/
   mcp/        MCP server + the web_search tool
   lib/        runSearch — the shared core called by both CLI and MCP
   providers/  per-provider implementations (openai, google-cse, gemini)
+  pricing/    list-price table and cost estimation
   config/     credential + base-URL resolution from env
   output/     text / JSON formatting
   utils/      logger, error formatter

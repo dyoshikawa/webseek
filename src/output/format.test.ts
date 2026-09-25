@@ -9,6 +9,8 @@ const serp: NormalizedSearchResult = {
   results: [{ title: "Example", url: "https://example.com", snippet: "An example." }],
   citations: [],
   searchQueries: ["q"],
+  usage: { searchCalls: 1 },
+  cost: { totalUsd: 0.005, tokensUsd: 0, searchUsd: 0.005 },
 };
 
 const grounded: NormalizedSearchResult = {
@@ -18,6 +20,9 @@ const grounded: NormalizedSearchResult = {
   answer: "The answer.",
   citations: [{ url: "https://src.dev", title: "Src" }],
   searchQueries: ["a query"],
+  model: "gpt-5.5",
+  usage: { inputTokens: 1200, outputTokens: 300, totalTokens: 1500, searchCalls: 1 },
+  cost: { totalUsd: 0.025, tokensUsd: 0.015, searchUsd: 0.01 },
 };
 
 describe("formatResult", () => {
@@ -41,5 +46,22 @@ describe("formatResult", () => {
     expect(json.provider).toBe("openai");
     expect(json.answer).toBe("The answer.");
     expect("raw" in json).toBe(false);
+    expect(json.usage).toEqual(grounded.usage);
+    expect(json.cost).toEqual(grounded.cost);
+  });
+
+  it("renders token usage and the estimated cost", () => {
+    const text = formatResult({ result: grounded, json: false });
+    expect(text).toContain("Usage: 1,500 tokens (1,200 in, 300 out), 1 search, ~$0.0250");
+  });
+
+  it("renders search-only usage for SERP providers", () => {
+    const text = formatResult({ result: serp, json: false });
+    expect(text).toContain("Usage: 1 search, ~$0.0050");
+  });
+
+  it("says the cost is unknown when the model has no price", () => {
+    const text = formatResult({ result: { ...grounded, cost: undefined }, json: false });
+    expect(text).toContain("1 search, cost unknown");
   });
 });

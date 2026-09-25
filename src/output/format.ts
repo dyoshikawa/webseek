@@ -3,7 +3,7 @@
  * human-readable text.
  */
 
-import type { NormalizedSearchResult } from "../providers/provider.js";
+import type { NormalizedSearchResult, SearchCost, SearchUsage } from "../providers/provider.js";
 
 export interface FormatParams {
   result: NormalizedSearchResult;
@@ -26,6 +26,9 @@ function formatJson(result: NormalizedSearchResult): string {
     answer: result.answer,
     citations: result.citations,
     searchQueries: result.searchQueries,
+    model: result.model,
+    usage: result.usage,
+    cost: result.cost,
   };
   if (result.raw !== undefined) {
     payload.raw = result.raw;
@@ -65,5 +68,33 @@ function formatText(result: NormalizedSearchResult): string {
     lines.push(`Searches: ${result.searchQueries.join(" | ")}`);
   }
 
+  lines.push(formatUsage({ usage: result.usage, cost: result.cost }));
+
   return lines.join("\n").trimEnd();
+}
+
+interface FormatUsageParams {
+  usage: SearchUsage;
+  cost: SearchCost | undefined;
+}
+
+function formatUsage(params: FormatUsageParams): string {
+  const { usage, cost } = params;
+  const parts: string[] = [];
+  if (usage.inputTokens !== undefined || usage.outputTokens !== undefined) {
+    const input = usage.inputTokens ?? 0;
+    const output = usage.outputTokens ?? 0;
+    const total = usage.totalTokens ?? input + output;
+    parts.push(
+      `${total.toLocaleString("en-US")} tokens (${input.toLocaleString("en-US")} in, ${output.toLocaleString("en-US")} out)`,
+    );
+  }
+  parts.push(`${usage.searchCalls} search${usage.searchCalls === 1 ? "" : "es"}`);
+  parts.push(cost === undefined ? "cost unknown" : `~${formatUsd(cost.totalUsd)}`);
+  return `Usage: ${parts.join(", ")}`;
+}
+
+function formatUsd(value: number): string {
+  // Searches cost fractions of a cent, so keep four significant decimals.
+  return `$${value.toFixed(4)}`;
 }

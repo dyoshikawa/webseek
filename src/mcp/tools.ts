@@ -60,7 +60,8 @@ export function createWebSearchTool(params: CreateWebSearchToolParams = {}): Web
       title: "Web Search",
       description:
         "Search the web using a provider's API key (OpenAI, Google Custom Search, or Gemini). " +
-        "Returns a normalized JSON result with SERP results and/or a grounded answer with citations.",
+        "Returns a normalized JSON result with SERP results and/or a grounded answer with citations, " +
+        "plus the tokens and searches used and an estimated USD cost.",
       inputSchema: webSearchInputShape,
     },
     handler: async (args: WebSearchArgs): Promise<ToolResult> => {

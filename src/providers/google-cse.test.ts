@@ -58,6 +58,8 @@ describe("google-cse provider", () => {
     expect(result.results).toHaveLength(15);
     expect(fake.requests).toHaveLength(2);
     expect(new URL(fake.requests[1]?.url ?? "").searchParams.get("start")).toBe("11");
+    expect(result.usage).toEqual({ searchCalls: 2 });
+    expect(result.cost?.totalUsd).toBeCloseTo(0.01);
   });
 
   it("maps auth failures to an auth_failed error", async () => {

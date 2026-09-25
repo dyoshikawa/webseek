@@ -39,6 +39,48 @@ describe("gemini provider", () => {
     expect(JSON.parse(String(request?.init?.body)).tools).toEqual([{ google_search: {} }]);
   });
 
+  it("reports usage (thinking as output, tool-use prompt as input) and the estimated cost", async () => {
+    const fake = createFakeFetch([
+      {
+        body: {
+          ...groundedBody,
+          modelVersion: "gemini-3.1-flash-lite",
+          usageMetadata: {
+            promptTokenCount: 100,
+            toolUsePromptTokenCount: 900,
+            candidatesTokenCount: 200,
+            thoughtsTokenCount: 300,
+            totalTokenCount: 1_500,
+          },
+        },
+      },
+    ]);
+    const provider = createGeminiProvider({
+      config: {
+        apiKey: "g-key",
+        backend: "gemini-api",
+        baseUrl: "https://generativelanguage.googleapis.com",
+      },
+    });
+
+    const result = await provider.search({
+      query: "euro 2024",
+      model: "gemini-3.1-flash-lite",
+      fetchImpl: fake.fetchImpl,
+    });
+
+    expect(result.model).toBe("gemini-3.1-flash-lite");
+    expect(result.usage).toEqual({
+      inputTokens: 1_000,
+      cachedInputTokens: undefined,
+      outputTokens: 500,
+      totalTokens: 1_500,
+      searchCalls: 1,
+    });
+    // 1k × $0.25 + 500 × $1.5 per 1M, plus one query at $14 per 1k.
+    expect(result.cost?.totalUsd).toBeCloseTo(0.000_25 + 0.000_75 + 0.014);
+  });
+
   it("vertex-express backend: uses ?key= query param, camelCase tool, aiplatform host", async () => {
     const fake = createFakeFetch([{ body: groundedBody }]);
     const provider = createGeminiProvider({

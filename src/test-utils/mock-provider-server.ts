@@ -44,6 +44,7 @@ const OPENAI_BODY = {
       ],
     },
   ],
+  usage: { input_tokens: 1_000, output_tokens: 100, total_tokens: 1_100 },
 };
 
 const GEMINI_BODY = {

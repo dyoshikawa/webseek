@@ -41,6 +41,14 @@ describe("E2E: CLI search", () => {
     const result = JSON.parse(stdout);
     expect(result.answer).toBe("Mock OpenAI answer.");
     expect(result.citations[0].url).toBe("https://src.example");
+    expect(result.usage).toEqual({
+      inputTokens: 1_000,
+      outputTokens: 100,
+      totalTokens: 1_100,
+      searchCalls: 1,
+    });
+    // gpt-5.5: 1k × $5 + 100 × $30 per 1M, plus one web search call at $10 per 1k.
+    expect(result.cost.totalUsd).toBeCloseTo(0.018);
   });
 
   it("gemini (gemini-api): prints a grounded answer", async () => {

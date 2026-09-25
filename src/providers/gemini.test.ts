@@ -78,7 +78,48 @@ describe("gemini provider", () => {
       searchCalls: 1,
     });
     // 1k × $0.25 + 500 × $1.5 per 1M, plus one query at $14 per 1k.
-    expect(result.cost?.totalUsd).toBeCloseTo(0.000_25 + 0.000_75 + 0.014);
+    expect(result.cost?.totalUsd).toBeCloseTo(0.000_25 + 0.000_75 + 0.014, 6);
+  });
+
+  it("falls back to the requested model when modelVersion has no price", async () => {
+    const fake = createFakeFetch([
+      {
+        body: {
+          ...groundedBody,
+          modelVersion: "gemini-2.5-flash-preview-05-20",
+          usageMetadata: { promptTokenCount: 1_000_000, totalTokenCount: 1_000_000 },
+        },
+      },
+    ]);
+    const provider = createGeminiProvider({
+      config: {
+        apiKey: "g-key",
+        backend: "gemini-api",
+        baseUrl: "https://generativelanguage.googleapis.com",
+      },
+    });
+
+    const result = await provider.search({ query: "q", fetchImpl: fake.fetchImpl });
+
+    expect(result.model).toBe("gemini-2.5-flash-preview-05-20");
+    // Default model gemini-2.5-flash: 1M × $0.30, plus one grounded prompt at $35 per 1k.
+    expect(result.cost?.totalUsd).toBeCloseTo(0.335, 6);
+  });
+
+  it("gives no cost without usageMetadata", async () => {
+    const fake = createFakeFetch([{ body: groundedBody }]);
+    const provider = createGeminiProvider({
+      config: {
+        apiKey: "g-key",
+        backend: "gemini-api",
+        baseUrl: "https://generativelanguage.googleapis.com",
+      },
+    });
+
+    const result = await provider.search({ query: "q", fetchImpl: fake.fetchImpl });
+
+    expect(result.usage).toEqual({ searchCalls: 1 });
+    expect(result.cost).toBeUndefined();
   });
 
   it("vertex-express backend: uses ?key= query param, camelCase tool, aiplatform host", async () => {

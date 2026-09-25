@@ -52,6 +52,8 @@ const GEMINI_3_SEARCH_PER_1K = 14;
 /** Gemini 2.5 bills each grounded prompt, however many queries it ran ($35 per 1k). */
 const GEMINI_2_5_SEARCH_PER_1K = 35;
 
+// The pricing page lists these Flash rates "through December 31, 2026" and the
+// doubled ones "starting January 1, 2027" (checked 2026-09-25).
 const GEMINI_3_FLASH: ModelPrice = {
   rates: { input: 0.75, cachedInput: 0.075, output: 3.75 },
   next: { from: "2027-01-01", rates: { input: 1.5, cachedInput: 0.15, output: 7.5 } },
@@ -97,8 +99,9 @@ export interface EstimateCostParams {
 }
 
 /**
- * Estimate what a search cost at list price, or `undefined` when the model has
- * no known price (e.g. a model newer than this table).
+ * Estimate what a search cost at list price, or `undefined` when it cannot be
+ * priced: the model is not in this table (e.g. newer than it), or an LLM-backed
+ * provider reported no token counts (a search-fee-only figure would understate).
  */
 export function estimateCost(params: EstimateCostParams): SearchCost | undefined {
   const { usage } = params;
@@ -109,12 +112,16 @@ export function estimateCost(params: EstimateCostParams): SearchCost | undefined
   }
 
   const table = params.provider === "openai" ? OPENAI_PRICES : GEMINI_PRICES;
-  const price = params.model === undefined ? undefined : lookupPrice(table, params.model);
+  const price =
+    params.model === undefined ? undefined : lookupPrice({ table, model: params.model });
   if (price === undefined) {
     return undefined;
   }
+  if (usage.inputTokens === undefined && usage.outputTokens === undefined) {
+    return undefined;
+  }
 
-  const rates = ratesAt(price, params.now ?? new Date());
+  const rates = ratesAt({ price, now: params.now ?? new Date() });
   const inputTokens = usage.inputTokens ?? 0;
   const cachedInputTokens = Math.min(usage.cachedInputTokens ?? 0, inputTokens);
   const tokensUsd =
@@ -128,16 +135,28 @@ export function estimateCost(params: EstimateCostParams): SearchCost | undefined
 }
 
 // Dated snapshots (`gpt-5.5-2026-04-23`) and Vertex publisher paths share the base price.
-function lookupPrice(table: Record<string, ModelPrice>, model: string): ModelPrice | undefined {
-  const id = model
+interface LookupPriceParams {
+  table: Record<string, ModelPrice>;
+  model: string;
+}
+
+function lookupPrice(params: LookupPriceParams): ModelPrice | undefined {
+  const { table } = params;
+  const id = params.model
     .replace(/^(?:.*\/)?models\//, "")
     .replace(/-\d{4}-\d{2}-\d{2}$/, "")
     .toLowerCase();
   return Object.hasOwn(table, id) ? table[id] : undefined;
 }
 
-function ratesAt(price: ModelPrice, now: Date): TokenRates {
-  if (price.next && now.toISOString().slice(0, 10) >= price.next.from) {
+interface RatesAtParams {
+  price: ModelPrice;
+  now: Date;
+}
+
+function ratesAt(params: RatesAtParams): TokenRates {
+  const { price } = params;
+  if (price.next && params.now.toISOString().slice(0, 10) >= price.next.from) {
     return price.next.rates;
   }
   return price.rates;

@@ -40,7 +40,7 @@ const contentSchema = z.looseObject({
 const outputItemSchema = z.looseObject({
   type: z.string().optional(),
   content: z.array(contentSchema).optional(),
-  action: z.looseObject({ type: z.string().optional(), query: z.string().optional() }).optional(),
+  action: z.looseObject({ query: z.string().optional() }).optional(),
 });
 
 const usageSchema = z.looseObject({
@@ -103,7 +103,9 @@ export function createOpenAIProvider(params: OpenAIProviderParams): SearchProvid
         searchQueries,
         model: servedModel,
         usage,
-        cost: estimateCost({ provider: "openai", model: servedModel, usage }),
+        cost:
+          estimateCost({ provider: "openai", model: servedModel, usage }) ??
+          estimateCost({ provider: "openai", model, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },
@@ -124,6 +126,8 @@ function extract(data: z.infer<typeof responseSchema>): Extracted {
   let searchCalls = 0;
 
   for (const item of data.output ?? []) {
+    // Every web_search_call item is one billed tool call, whatever its action
+    // (search, open_page, find_in_page).
     if (item.type === "web_search_call") {
       searchCalls += 1;
       if (item.action?.query) {

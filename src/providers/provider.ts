@@ -61,8 +61,8 @@ export interface NormalizedSearchResult {
   searchQueries: string[];
   /** The model that served the search (grounded providers). */
   model?: string;
-  /** Tokens and searches consumed. */
-  usage: SearchUsage;
+  /** Tokens and searches consumed (always set by the built-in providers). */
+  usage?: SearchUsage;
   /** Estimated cost; absent when the model's price is unknown. */
   cost?: SearchCost;
   /** The provider's raw response, included only when requested. */

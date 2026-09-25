@@ -144,7 +144,11 @@ export function createGeminiProvider(params: GeminiProviderParams): SearchProvid
         searchQueries,
         model: servedModel,
         usage,
-        cost: estimateCost({ provider: "gemini", model: servedModel, usage }),
+        // `modelVersion` may name a variant the price table lacks; fall back to
+        // the requested model.
+        cost:
+          estimateCost({ provider: "gemini", model: servedModel, usage }) ??
+          estimateCost({ provider: "gemini", model, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },

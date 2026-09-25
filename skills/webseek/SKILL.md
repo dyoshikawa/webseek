@@ -59,7 +59,8 @@ JSON output (and the MCP tool result) carries the same data as `usage` and
   the provider's search fee (OpenAI $10 per 1k calls, Gemini 3.x $14 per 1k
   queries, Gemini 2.5 $35 per 1k grounded prompts, Google Custom Search $5 per 1k
   queries). Free allowances and discounts are **not** applied, so it is an upper
-  estimate, not your bill. `cost` is omitted when the model has no known price.
+  estimate, not your bill. `cost` is omitted when the model has no known price
+  or the provider reported no token counts.
 
 ## Install
 

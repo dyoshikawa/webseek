@@ -68,7 +68,9 @@ function formatText(result: NormalizedSearchResult): string {
     lines.push(`Searches: ${result.searchQueries.join(" | ")}`);
   }
 
-  lines.push(formatUsage({ usage: result.usage, cost: result.cost }));
+  if (result.usage) {
+    lines.push(formatUsage({ usage: result.usage, cost: result.cost }));
+  }
 
   return lines.join("\n").trimEnd();
 }
@@ -95,6 +97,10 @@ function formatUsage(params: FormatUsageParams): string {
 }
 
 function formatUsd(value: number): string {
-  // Searches cost fractions of a cent, so keep four significant decimals.
+  // Searches cost fractions of a cent, so show four decimal places; a non-zero
+  // cost below that would otherwise print as $0.0000.
+  if (value > 0 && value < 0.00005) {
+    return "<$0.0001";
+  }
   return `$${value.toFixed(4)}`;
 }

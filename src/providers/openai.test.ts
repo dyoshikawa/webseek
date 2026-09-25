@@ -108,7 +108,7 @@ describe("openai provider", () => {
       totalTokens: 11_000,
       searchCalls: 2,
     });
-    expect(result.cost?.totalUsd).toBeCloseTo(0.091);
+    expect(result.cost?.totalUsd).toBeCloseTo(0.091, 6);
   });
 
   it("leaves the cost unset for a model without a known price", async () => {
@@ -117,9 +117,32 @@ describe("openai provider", () => {
     ]);
     const provider = createOpenAIProvider({ config });
 
+    const result = await provider.search({ query: "q", model: "gpt-9", fetchImpl: fake.fetchImpl });
+
+    expect(result.usage?.inputTokens).toBe(5);
+    expect(result.cost).toBeUndefined();
+  });
+
+  it("gives no cost when the response carries no usage", async () => {
+    const fake = createFakeFetch([
+      {
+        body: {
+          usage: null,
+          output: [{ type: "web_search_call", action: { query: "a" } }],
+        },
+      },
+    ]);
+    const provider = createOpenAIProvider({ config });
+
     const result = await provider.search({ query: "q", fetchImpl: fake.fetchImpl });
 
-    expect(result.usage.inputTokens).toBe(5);
+    expect(result.usage).toEqual({
+      inputTokens: undefined,
+      cachedInputTokens: undefined,
+      outputTokens: undefined,
+      totalTokens: undefined,
+      searchCalls: 1,
+    });
     expect(result.cost).toBeUndefined();
   });
 

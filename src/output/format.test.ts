@@ -60,6 +60,23 @@ describe("formatResult", () => {
     expect(text).toContain("Usage: 1 search, ~$0.0050");
   });
 
+  it("pluralizes searches and marks sub-$0.0001 costs", () => {
+    const text = formatResult({
+      result: {
+        ...grounded,
+        usage: { inputTokens: 10, outputTokens: 0, searchCalls: 2 },
+        cost: { totalUsd: 0.00001, tokensUsd: 0.00001, searchUsd: 0 },
+      },
+      json: false,
+    });
+    expect(text).toContain("Usage: 10 tokens (10 in, 0 out), 2 searches, ~<$0.0001");
+  });
+
+  it("omits the usage line when a result carries no usage", () => {
+    const text = formatResult({ result: { ...serp, usage: undefined }, json: false });
+    expect(text).not.toContain("Usage:");
+  });
+
   it("says the cost is unknown when the model has no price", () => {
     const text = formatResult({ result: { ...grounded, cost: undefined }, json: false });
     expect(text).toContain("1 search, cost unknown");

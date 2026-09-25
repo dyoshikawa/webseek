@@ -57,6 +57,7 @@ const GEMINI_BODY = {
       },
     },
   ],
+  usageMetadata: { promptTokenCount: 1_000, candidatesTokenCount: 100, totalTokenCount: 1_100 },
 };
 
 function bodyForPath(pathname: string): unknown {

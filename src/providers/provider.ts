@@ -27,6 +27,26 @@ export interface Citation {
   endIndex?: number;
 }
 
+/** What a search consumed. Token counts are absent for SERP providers. */
+export interface SearchUsage {
+  /** Prompt tokens, including cached ones and fetched search content. */
+  inputTokens?: number;
+  /** The part of `inputTokens` served from the prompt cache. */
+  cachedInputTokens?: number;
+  /** Generated tokens, including reasoning/thinking tokens. */
+  outputTokens?: number;
+  totalTokens?: number;
+  /** Searches the provider ran (web search tool calls, grounding queries, or SERP requests). */
+  searchCalls: number;
+}
+
+/** Estimated list-price cost of a search in USD (free tiers not applied). */
+export interface SearchCost {
+  totalUsd: number;
+  tokensUsd: number;
+  searchUsd: number;
+}
+
 /** The normalized result shape returned by every provider. */
 export interface NormalizedSearchResult {
   provider: ProviderName;
@@ -39,6 +59,12 @@ export interface NormalizedSearchResult {
   citations: Citation[];
   /** Queries the provider actually ran (grounded providers). */
   searchQueries: string[];
+  /** The model that served the search (grounded providers). */
+  model?: string;
+  /** Tokens and searches consumed (always set by the built-in providers). */
+  usage?: SearchUsage;
+  /** Estimated cost; absent when the model's price is unknown. */
+  cost?: SearchCost;
   /** The provider's raw response, included only when requested. */
   raw?: unknown;
 }

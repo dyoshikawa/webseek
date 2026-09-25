@@ -12,6 +12,7 @@
 import { z } from "zod";
 
 import type { GoogleCseConfig } from "../config/env.js";
+import { estimateCost } from "../pricing/pricing.js";
 import { WebseekError } from "../utils/error.js";
 import type { NormalizedSearchResult, SearchParams, SearchProvider } from "./provider.js";
 
@@ -54,6 +55,7 @@ export function createGoogleCseProvider(params: GoogleCseProviderParams): Search
 
       const items: z.infer<typeof itemSchema>[] = [];
       let lastRaw: unknown;
+      let requests = 0;
 
       // Paginate in pages of 10 until we have enough or run out of results.
       for (
@@ -65,6 +67,7 @@ export function createGoogleCseProvider(params: GoogleCseProviderParams): Search
         const url = buildUrl({ config, query: searchParams.query, start, num });
 
         const response = await fetchImpl(url);
+        requests += 1;
         const body = await response.json().catch(() => undefined);
         lastRaw = body;
 
@@ -80,6 +83,8 @@ export function createGoogleCseProvider(params: GoogleCseProviderParams): Search
         }
       }
 
+      const usage = { searchCalls: requests };
+
       return {
         provider: "google",
         query: searchParams.query,
@@ -91,6 +96,8 @@ export function createGoogleCseProvider(params: GoogleCseProviderParams): Search
         })),
         citations: [],
         searchQueries: [searchParams.query],
+        usage,
+        cost: estimateCost({ provider: "google", usage }),
         raw: searchParams.includeRaw ? lastRaw : undefined,
       };
     },

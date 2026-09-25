@@ -41,6 +41,14 @@ describe("E2E: CLI search", () => {
     const result = JSON.parse(stdout);
     expect(result.answer).toBe("Mock OpenAI answer.");
     expect(result.citations[0].url).toBe("https://src.example");
+    expect(result.usage).toEqual({
+      inputTokens: 1_000,
+      outputTokens: 100,
+      totalTokens: 1_100,
+      searchCalls: 1,
+    });
+    // gpt-5.5: 1k × $5 + 100 × $30 per 1M, plus one web search call at $10 per 1k.
+    expect(result.cost.totalUsd).toBeCloseTo(0.018, 6);
   });
 
   it("gemini (gemini-api): prints a grounded answer", async () => {
@@ -49,7 +57,16 @@ describe("E2E: CLI search", () => {
       env: { GEMINI_API_KEY: "g-key", WEBSEEK_GEMINI_BASE_URL: mock.url },
     });
     expect(code).toBe(0);
-    expect(JSON.parse(stdout).answer).toBe("Mock Gemini answer.");
+    const result = JSON.parse(stdout);
+    expect(result.answer).toBe("Mock Gemini answer.");
+    expect(result.usage).toEqual({
+      inputTokens: 1_000,
+      outputTokens: 100,
+      totalTokens: 1_100,
+      searchCalls: 1,
+    });
+    // gemini-2.5-flash: 1k × $0.30 + 100 × $2.50 per 1M, plus one grounded prompt at $35 per 1k.
+    expect(result.cost.totalUsd).toBeCloseTo(0.03555, 6);
   });
 
   it("gemini (vertex-express): prints a grounded answer", async () => {

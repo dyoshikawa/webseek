@@ -44,6 +44,7 @@ const OPENAI_BODY = {
       ],
     },
   ],
+  usage: { input_tokens: 1_000, output_tokens: 100, total_tokens: 1_100 },
 };
 
 const GEMINI_BODY = {
@@ -56,6 +57,7 @@ const GEMINI_BODY = {
       },
     },
   ],
+  usageMetadata: { promptTokenCount: 1_000, candidatesTokenCount: 100, totalTokenCount: 1_100 },
 };
 
 function bodyForPath(pathname: string): unknown {

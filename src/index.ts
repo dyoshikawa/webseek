@@ -16,9 +16,15 @@ export type {
   NormalizedSearchResult,
   ProviderName,
   SearchParams,
+  SearchCost,
   SearchProvider,
   SearchResultItem,
+  SearchUsage,
 } from "./providers/provider.js";
+
+// Cost estimation
+export { estimateCost } from "./pricing/pricing.js";
+export type { EstimateCostParams } from "./pricing/pricing.js";
 
 // Environment configuration types
 export type { Env, GeminiBackend } from "./config/env.js";

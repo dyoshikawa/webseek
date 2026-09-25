@@ -21,8 +21,15 @@
 import { z } from "zod";
 
 import type { GeminiBackend, GeminiConfig } from "../config/env.js";
+import { estimateCost } from "../pricing/pricing.js";
 import { WebseekError } from "../utils/error.js";
-import type { Citation, NormalizedSearchResult, SearchParams, SearchProvider } from "./provider.js";
+import type {
+  Citation,
+  NormalizedSearchResult,
+  SearchParams,
+  SearchProvider,
+  SearchUsage,
+} from "./provider.js";
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 
@@ -71,8 +78,19 @@ const candidateSchema = z.looseObject({
   groundingMetadata: groundingMetadataSchema.optional(),
 });
 
+const usageMetadataSchema = z.looseObject({
+  promptTokenCount: z.number().optional(),
+  cachedContentTokenCount: z.number().optional(),
+  candidatesTokenCount: z.number().optional(),
+  thoughtsTokenCount: z.number().optional(),
+  toolUsePromptTokenCount: z.number().optional(),
+  totalTokenCount: z.number().optional(),
+});
+
 const responseSchema = z.looseObject({
   candidates: z.array(candidateSchema).optional(),
+  usageMetadata: usageMetadataSchema.optional(),
+  modelVersion: z.string().optional(),
   error: z.looseObject({ message: z.string().optional() }).optional(),
 });
 
@@ -111,6 +129,11 @@ export function createGeminiProvider(params: GeminiProviderParams): SearchProvid
       }
 
       const { answer, citations, searchQueries } = extract(parsed.data);
+      const servedModel = parsed.data.modelVersion ?? model;
+      const usage = toUsage({
+        usage: parsed.data.usageMetadata,
+        searchCalls: searchQueries.length,
+      });
 
       return {
         provider: "gemini",
@@ -119,6 +142,13 @@ export function createGeminiProvider(params: GeminiProviderParams): SearchProvid
         answer,
         citations,
         searchQueries,
+        model: servedModel,
+        usage,
+        // `modelVersion` may name a variant the price table lacks; fall back to
+        // the requested model.
+        cost:
+          estimateCost({ provider: "gemini", model: servedModel, usage }) ??
+          estimateCost({ provider: "gemini", model, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },
@@ -148,6 +178,33 @@ function extract(data: z.infer<typeof responseSchema>): Extracted {
     citations,
     searchQueries: metadata?.webSearchQueries ?? [],
   };
+}
+
+interface ToUsageParams {
+  usage: z.infer<typeof usageMetadataSchema> | undefined;
+  searchCalls: number;
+}
+
+// Thinking tokens bill as output; tool-use prompt tokens (fetched search content) as input.
+function toUsage(params: ToUsageParams): SearchUsage {
+  const { usage } = params;
+  if (usage === undefined) {
+    return { searchCalls: params.searchCalls };
+  }
+  const inputTokens = sumDefined([usage.promptTokenCount, usage.toolUsePromptTokenCount]);
+  const outputTokens = sumDefined([usage.candidatesTokenCount, usage.thoughtsTokenCount]);
+  return {
+    inputTokens,
+    cachedInputTokens: usage.cachedContentTokenCount,
+    outputTokens,
+    totalTokens: usage.totalTokenCount,
+    searchCalls: params.searchCalls,
+  };
+}
+
+function sumDefined(values: (number | undefined)[]): number | undefined {
+  const defined = values.filter((value): value is number => value !== undefined);
+  return defined.length > 0 ? defined.reduce((total, value) => total + value, 0) : undefined;
 }
 
 interface ToErrorParams {

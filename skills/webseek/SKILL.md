@@ -58,8 +58,8 @@ JSON output (and the MCP tool result) carries the same data as `usage` and
 - `cost` is computed from built-in list prices: token rates for the model plus
   the provider's search fee (OpenAI $10 per 1k calls, Gemini 3.x $14 per 1k
   queries, Gemini 2.5 $35 per 1k grounded prompts, Google Custom Search $5 per 1k
-  queries). Free allowances and discounts are **not** applied, so it is an upper
-  estimate, not your bill. `cost` is omitted when the model has no known price
+  queries). It is a list-price estimate, not your bill: free allowances,
+  discounts and long-context rates are **not** applied. `cost` is omitted when the model has no known price
   or the provider reported no token counts.
 
 ## Install
@@ -147,6 +147,24 @@ CommonJS consumers can `require` it the same way:
 ```js
 const { runSearch } = require("webseek");
 ```
+
+Each result carries `usage` and, when it can be priced, an estimated `cost` (see
+[Usage and cost](#usage-and-cost)). To price usage yourself — for example to sum
+several searches — call `estimateCost` with the provider, the model and a
+`usage` object; it returns `undefined` when the model has no known price:
+
+```ts
+import { estimateCost } from "webseek";
+
+const cost = estimateCost({
+  provider: "openai",
+  model: "gpt-5.5",
+  usage: { inputTokens: 1000, outputTokens: 100, searchCalls: 1 },
+});
+console.log(cost?.totalUsd.toFixed(3)); // "0.018"
+```
+
+Prices are list prices built into the package and change with its releases.
 
 To embed the `web_search` tool into your own MCP server, use the
 `createWebSearchTool` factory exported from the same entry point.

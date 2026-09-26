@@ -93,8 +93,13 @@ export interface EstimateCostParams {
   provider: ProviderName;
   /** The model that served the search (ignored for SERP providers). */
   model?: string;
+  /**
+   * Priced instead when `model` is not in the table — typically the requested
+   * model, since the served id may be a snapshot or variant the table lacks.
+   */
+  fallbackModel?: string;
   usage: SearchUsage;
-  /** Injectable for tests; defaults to the current time. */
+  /** Price as of this moment (rates can change on a set date); defaults to now. */
   now?: Date;
 }
 
@@ -112,8 +117,10 @@ export function estimateCost(params: EstimateCostParams): SearchCost | undefined
   }
 
   const table = params.provider === "openai" ? OPENAI_PRICES : GEMINI_PRICES;
-  const price =
-    params.model === undefined ? undefined : lookupPrice({ table, model: params.model });
+  const price = [params.model, params.fallbackModel]
+    .filter((model): model is string => model !== undefined)
+    .map((model) => lookupPrice({ table, model }))
+    .find((found) => found !== undefined);
   if (price === undefined) {
     return undefined;
   }

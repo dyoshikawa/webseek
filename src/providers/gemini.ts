@@ -144,11 +144,7 @@ export function createGeminiProvider(params: GeminiProviderParams): SearchProvid
         searchQueries,
         model: servedModel,
         usage,
-        // `modelVersion` may name a variant the price table lacks; fall back to
-        // the requested model.
-        cost:
-          estimateCost({ provider: "gemini", model: servedModel, usage }) ??
-          estimateCost({ provider: "gemini", model, usage }),
+        cost: estimateCost({ provider: "gemini", model: servedModel, fallbackModel: model, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },
@@ -185,7 +181,9 @@ interface ToUsageParams {
   searchCalls: number;
 }
 
-// Thinking tokens bill as output; tool-use prompt tokens (fetched search content) as input.
+// Thinking tokens bill as output. Tool-use prompt tokens (fetched search content)
+// are counted as input on the assumption that they bill at the input rate like
+// the rest of the prompt; the pricing page does not say so explicitly (2026-09-25).
 function toUsage(params: ToUsageParams): SearchUsage {
   const { usage } = params;
   if (usage === undefined) {

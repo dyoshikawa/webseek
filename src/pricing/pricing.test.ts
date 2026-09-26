@@ -112,6 +112,20 @@ describe("estimateCost", () => {
     expect(cost).toBeUndefined();
   });
 
+  it("prices the fallback model when the served model is unknown", () => {
+    const usage = { inputTokens: 1_000_000, searchCalls: 0 };
+    const cost = estimateCost({
+      provider: "gemini",
+      model: "gemini-2.5-flash-preview-05-20",
+      fallbackModel: "gemini-2.5-flash",
+      usage,
+    });
+    expect(cost?.totalUsd).toBeCloseTo(0.3, 6);
+    expect(
+      estimateCost({ provider: "gemini", model: "gemini-9", fallbackModel: "gemini-10", usage }),
+    ).toBeUndefined();
+  });
+
   it("prices Google Custom Search per request", () => {
     const cost = estimateCost({ provider: "google", usage: { searchCalls: 3 } });
     expect(cost).toEqual({ totalUsd: 0.015, tokensUsd: 0, searchUsd: 0.015 });

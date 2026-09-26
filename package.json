@@ -1,6 +1,6 @@
 {
   "name": "webseek",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Unified multi-provider web search as a CLI, MCP server, and library (OpenAI, Google Custom Search, Gemini)",
   "keywords": [
     "web-search",

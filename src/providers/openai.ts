@@ -103,9 +103,7 @@ export function createOpenAIProvider(params: OpenAIProviderParams): SearchProvid
         searchQueries,
         model: servedModel,
         usage,
-        cost:
-          estimateCost({ provider: "openai", model: servedModel, usage }) ??
-          estimateCost({ provider: "openai", model, usage }),
+        cost: estimateCost({ provider: "openai", model: servedModel, fallbackModel: model, usage }),
         raw: searchParams.includeRaw ? body : undefined,
       };
     },

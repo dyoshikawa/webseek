@@ -123,6 +123,29 @@ describe("openai provider", () => {
     expect(result.cost).toBeUndefined();
   });
 
+  it("prices the requested model when the served model is unknown", async () => {
+    const fake = createFakeFetch([
+      {
+        body: {
+          model: "gpt-5.5-turbo-preview",
+          output: [],
+          usage: { input_tokens: 1_000_000, output_tokens: 0 },
+        },
+      },
+    ]);
+    const provider = createOpenAIProvider({ config });
+
+    const result = await provider.search({
+      query: "q",
+      model: "gpt-5.5",
+      fetchImpl: fake.fetchImpl,
+    });
+
+    expect(result.model).toBe("gpt-5.5-turbo-preview");
+    // gpt-5.5: 1M input tokens × $5 per 1M; no web search call.
+    expect(result.cost?.totalUsd).toBeCloseTo(5, 6);
+  });
+
   it("gives no cost when the response carries no usage", async () => {
     const fake = createFakeFetch([
       {

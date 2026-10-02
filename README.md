@@ -96,8 +96,9 @@ webseek "summarize the latest TypeScript release" -p openai
 webseek "who won euro 2024" -p gemini --gemini-backend vertex-express --json
 ```
 
-`mcp` and `stats` are subcommands: a query that is just one of those words runs
-the subcommand instead of a search, so add more words to it.
+`mcp` and `stats` are subcommands: a query whose first word is `mcp` or
+`stats` must be quoted as a whole (`webseek "stats for the nba" -p openai`), and
+a query of just that one word cannot be searched from the CLI.
 
 ### Usage stats
 

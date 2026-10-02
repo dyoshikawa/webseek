@@ -78,6 +78,13 @@ describe("renderStats", () => {
     const text = renderStats({ ...base, models: true });
     expect(text).toMatch(/^gemini\/gemini-next +1 +150 +-$/m);
   });
+
+  it("strips control characters from model names", () => {
+    const hostile = { ...stats.models[0]!, model: "gpt\u001b[2Jx" };
+    const text = renderStats({ ...base, stats: { ...stats, models: [hostile] }, models: true });
+    expect(text).toContain("openai/gpt[2Jx");
+    expect(text).not.toContain("\u001b");
+  });
 });
 
 describe("compact", () => {

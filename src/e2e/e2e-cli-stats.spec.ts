@@ -63,7 +63,7 @@ describe("E2E: CLI stats", () => {
     expect(stats.models[0]).toMatchObject({ provider: "openai", model: "gpt-5.5", searches: 2 });
 
     const filtered = await runCli({ args: ["stats", "-p", "google", "--models"], env });
-    expect(filtered.stdout).toContain("google");
+    expect(filtered.stdout).toMatch(/^google +1 +0 +\$0\.0050$/m);
     expect(filtered.stdout).not.toContain("gpt-5.5");
   });
 

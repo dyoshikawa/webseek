@@ -92,9 +92,13 @@ export async function appendUsageRecord(params: {
   }
   try {
     const dir = resolveDataDir({ env: params.env });
-    await mkdir(dir, { recursive: true });
+    // Owner-only: the log reveals when and how much someone searches.
+    await mkdir(dir, { recursive: true, mode: 0o700 });
     const record = toUsageRecord({ result: params.result, now: params.now });
-    await appendFile(join(dir, USAGE_LOG_FILE), `${JSON.stringify(record)}\n`, "utf8");
+    await appendFile(join(dir, USAGE_LOG_FILE), `${JSON.stringify(record)}\n`, {
+      encoding: "utf8",
+      mode: 0o600,
+    });
   } catch (error) {
     params.onError?.(error);
   }

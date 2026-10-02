@@ -38,6 +38,8 @@ describe("toStatsRequest", () => {
     expect(() => toStatsRequest({ options: { days: "-1" }, now })).toThrowError(/--days/);
     expect(() => toStatsRequest({ options: { limit: "0" }, now })).toThrowError(/--limit/);
     expect(() => toStatsRequest({ options: { year: "20x" }, now })).toThrowError(/--year/);
+    expect(() => toStatsRequest({ options: { year: "99" }, now })).toThrowError(/--year/);
+    expect(() => toStatsRequest({ options: { days: "99999999999" }, now })).toThrowError(/--days/);
     expect(() => toStatsRequest({ options: { provider: "bing" }, now })).toThrowError(/provider/);
   });
 });

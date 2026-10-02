@@ -53,11 +53,11 @@ export function toStatsRequest(params: { options: StatsCommandOptions; now?: Dat
       days:
         options.days === undefined
           ? undefined
-          : parseInteger({ name: "days", value: options.days, min: 0 }),
+          : parseInteger({ name: "days", value: options.days, min: 0, max: 36_500 }),
       year:
         options.year === undefined
           ? undefined
-          : parseInteger({ name: "year", value: options.year, min: 1 }),
+          : parseInteger({ name: "year", value: options.year, min: 1970, max: 9999 }),
       all: options.all,
       now: params.now,
     }),
@@ -67,18 +67,28 @@ export function toStatsRequest(params: { options: StatsCommandOptions; now?: Dat
     limit:
       options.limit === undefined
         ? undefined
-        : parseInteger({ name: "limit", value: options.limit, min: 1 }),
+        : parseInteger({
+            name: "limit",
+            value: options.limit,
+            min: 1,
+            max: Number.MAX_SAFE_INTEGER,
+          }),
     json: Boolean(options.json),
   };
 }
 
-function parseInteger(params: { name: string; value: string; min: number }): number {
-  const { name, value, min } = params;
+function parseInteger(params: { name: string; value: string; min: number; max: number }): number {
+  const { name, value, min, max } = params;
   const parsed = Number(value);
-  if (!/^\d+$/.test(value.trim()) || !Number.isSafeInteger(parsed) || parsed < min) {
+  if (
+    !/^\d+$/.test(value.trim()) ||
+    !Number.isSafeInteger(parsed) ||
+    parsed < min ||
+    parsed > max
+  ) {
     throw new WebseekError({
       code: "invalid_usage",
-      message: `--${name} must be an integer of at least ${min}.`,
+      message: `--${name} must be an integer between ${min} and ${max}.`,
     });
   }
   return parsed;

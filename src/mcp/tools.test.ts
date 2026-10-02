@@ -44,6 +44,15 @@ describe("web_search tool", () => {
     });
 
     expect(seen).toEqual(["google"]);
+
+    const throwing = createWebSearchTool({
+      env: { GOOGLE_API_KEY: "k", GOOGLE_CSE_CX: "cx" },
+      fetchImpl: createFakeFetch([{ body: { items: [] } }]).fetchImpl,
+      onResult: () => {
+        throw new Error("observer failed");
+      },
+    });
+    expect((await throwing.handler({ provider: "google", query: "q" })).isError).toBeFalsy();
   });
 
   it("returns an error result when credentials are missing", async () => {

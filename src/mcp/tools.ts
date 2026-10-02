@@ -79,7 +79,11 @@ export function createWebSearchTool(params: CreateWebSearchToolParams = {}): Web
           env: params.env,
           fetchImpl: params.fetchImpl,
         });
-        await params.onResult?.(result);
+        try {
+          await params.onResult?.(result);
+        } catch {
+          // A failing observer must not turn a successful search into an error.
+        }
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (error) {
         return { content: [{ type: "text", text: formatError(error) }], isError: true };

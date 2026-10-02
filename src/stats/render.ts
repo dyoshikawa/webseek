@@ -91,7 +91,10 @@ function renderModels(params: { models: ModelStats[]; limit?: number }): string[
 }
 
 function modelName(model: ModelStats): string {
-  return model.model ? `${model.provider}/${model.model}` : model.provider;
+  // The model name comes from the provider's response; drop control characters
+  // so a hostile endpoint cannot smuggle terminal escape sequences into the report.
+  const name = model.model?.replace(/\p{Cc}/gu, "");
+  return name ? `${model.provider}/${name}` : model.provider;
 }
 
 function tableRow(cells: { name: string; searches: string; tokens: string; cost: string }): string {

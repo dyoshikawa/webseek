@@ -7,6 +7,8 @@
  */
 
 import { execFile } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
@@ -31,10 +33,13 @@ const providerCredentialEnvNames = new Set([
   "VERTEX_API_KEY",
 ]);
 
+/** Keeps searches run by the tests out of the real usage log. */
+const defaultDataDir = mkdtempSync(join(tmpdir(), "webseek-e2e-"));
+
 export function cleanEnv(overrides: Record<string, string> = {}): Record<string, string> {
-  const base: Record<string, string> = {};
+  const base: Record<string, string> = { WEBSEEK_DATA_DIR: defaultDataDir };
   for (const [key, value] of Object.entries(process.env)) {
-    if (value !== undefined && !providerCredentialEnvNames.has(key)) {
+    if (value !== undefined && !providerCredentialEnvNames.has(key) && key !== "WEBSEEK_DATA_DIR") {
       base[key] = value;
     }
   }

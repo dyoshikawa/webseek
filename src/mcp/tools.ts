@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import type { Env } from "../config/env.js";
 import { GEMINI_BACKENDS, PROVIDER_NAMES, runSearch } from "../lib/search.js";
+import type { NormalizedSearchResult } from "../providers/provider.js";
 import { formatError } from "../utils/error.js";
 
 export const webSearchInputShape = {
@@ -41,6 +42,8 @@ export interface CreateWebSearchToolParams {
   env?: Env;
   /** Injectable for tests; defaults to the global fetch. */
   fetchImpl?: typeof fetch;
+  /** Called with every successful result before it is returned (e.g. to log usage). */
+  onResult?: (result: NormalizedSearchResult) => Promise<void> | void;
 }
 
 export interface WebSearchTool {
@@ -76,6 +79,7 @@ export function createWebSearchTool(params: CreateWebSearchToolParams = {}): Web
           env: params.env,
           fetchImpl: params.fetchImpl,
         });
+        await params.onResult?.(result);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (error) {
         return { content: [{ type: "text", text: formatError(error) }], isError: true };

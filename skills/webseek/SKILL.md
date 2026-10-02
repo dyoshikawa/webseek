@@ -62,6 +62,9 @@ JSON output (and the MCP tool result) carries the same data as `usage` and
   discounts and long-context rates are **not** applied. `cost` is omitted when the model has no known price
   or the provider reported no token counts.
 
+The CLI and the MCP server also append every successful search to a local usage
+log, which [`webseek stats`](#usage-stats) totals.
+
 ## Install
 
 ```bash
@@ -103,6 +106,53 @@ webseek "best static site generators 2026" -p google -n 5
 webseek "summarize the latest TypeScript release" -p openai
 webseek "who won euro 2024" -p gemini --gemini-backend vertex-express --json
 ```
+
+`mcp` and `stats` are subcommands: a query that is just one of those words runs
+the subcommand instead of a search, so add more words to it.
+
+### Usage stats
+
+Every successful search — from the CLI or the MCP server — is appended as one
+JSON line to `usage.jsonl` in the data directory: the time, provider, model,
+`usage` and `cost`. The query text is **not** stored. `webseek stats` totals
+the log, with flags modelled on `opencode stats`:
+
+```bash
+webseek stats                  # this year so far
+webseek stats --days 7 --full  # the last 7 days with every section
+webseek stats --all -p openai --models
+```
+
+```
+webseek stats · 2026 so far · all providers
+
+3 searches · 4 search calls · 12.9k tokens
+~$0.0550 estimated · 1 active day
+```
+
+| Flag                    | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `--days <n>`            | The last N days; `0` means today                    |
+| `--year <year>`         | A calendar year (default: this year so far)         |
+| `--all`                 | Lifetime statistics                                 |
+| `-p, --provider <name>` | Only count one provider                             |
+| `--cost`                | Cost split (tokens / search fees) and token details |
+| `--models`              | Searches, tokens and cost per model                 |
+| `--full`                | Every detailed section                              |
+| `--limit <n>`           | Number of rows in the models section                |
+| `--json`                | Statistics as JSON                                  |
+
+`--days`, `--year` and `--all` cannot be combined. Costs are the same list-price
+estimates as in each search's output; searches whose model has no known price
+are counted but left out of the cost (and reported as unpriced).
+
+| Environment variable | Effect                                                                           |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `WEBSEEK_DATA_DIR`   | Data directory (default `$XDG_DATA_HOME/webseek`, else `~/.local/share/webseek`) |
+| `WEBSEEK_USAGE_LOG`  | Set to `0`, `false` or `off` to stop recording searches                          |
+
+Delete `usage.jsonl` to reset the statistics. A failure to write the log is
+reported as a warning on stderr and never fails the search.
 
 ## MCP server mode
 
@@ -167,7 +217,11 @@ console.log(cost?.totalUsd.toFixed(3)); // "0.018"
 Prices are list prices built into the package and change with its releases.
 
 To embed the `web_search` tool into your own MCP server, use the
-`createWebSearchTool` factory exported from the same entry point.
+`createWebSearchTool` factory exported from the same entry point. Its optional
+`onResult` callback receives every successful result (the `webseek mcp` server
+uses it to write the usage log).
+
+The library itself never writes the usage log; only the CLI and `webseek mcp` do.
 
 ## Authentication
 

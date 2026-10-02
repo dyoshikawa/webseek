@@ -21,6 +21,31 @@ describe("web_search tool", () => {
     expect(parsed.results[0].url).toBe("https://x.example");
   });
 
+  it("passes each successful result to onResult", async () => {
+    const fake = createFakeFetch([{ body: { items: [] } }]);
+    const seen: string[] = [];
+    const tool = createWebSearchTool({
+      env: { GOOGLE_API_KEY: "k", GOOGLE_CSE_CX: "cx" },
+      fetchImpl: fake.fetchImpl,
+      onResult: (result) => {
+        seen.push(result.provider);
+      },
+    });
+
+    await tool.handler({ provider: "google", query: "q" });
+    await createWebSearchTool({
+      env: {},
+      onResult: () => {
+        seen.push("error");
+      },
+    }).handler({
+      provider: "openai",
+      query: "q",
+    });
+
+    expect(seen).toEqual(["google"]);
+  });
+
   it("returns an error result when credentials are missing", async () => {
     const tool = createWebSearchTool({ env: {} });
 

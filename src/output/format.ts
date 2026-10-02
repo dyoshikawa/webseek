@@ -96,7 +96,7 @@ function formatUsage(params: FormatUsageParams): string {
   return `Usage: ${parts.join(", ")}`;
 }
 
-function formatUsd(value: number): string {
+export function formatUsd(value: number): string {
   // Searches cost fractions of a cent, so show four decimal places; a non-zero
   // cost below that would otherwise print as $0.0000.
   if (value > 0 && value < 0.00005) {

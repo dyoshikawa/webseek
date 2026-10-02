@@ -8,6 +8,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
+import { appendUsageRecord } from "../stats/usage-log.js";
+import { formatError } from "../utils/error.js";
 import type { Logger } from "../utils/logger.js";
 import { createWebSearchTool } from "./tools.js";
 
@@ -19,7 +21,13 @@ export interface StartMcpServerParams {
 export async function startMcpServer(params: StartMcpServerParams): Promise<void> {
   const server = new McpServer({ name: "webseek", version: params.version });
 
-  const tool = createWebSearchTool();
+  const tool = createWebSearchTool({
+    onResult: (result) =>
+      appendUsageRecord({
+        result,
+        onError: (error) => params.logger.warn(`could not record usage: ${formatError(error)}`),
+      }),
+  });
   server.registerTool(tool.name, tool.config, tool.handler);
 
   const transport = new StdioServerTransport();

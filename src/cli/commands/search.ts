@@ -14,7 +14,8 @@ import {
   runSearch,
 } from "../../lib/search.js";
 import { formatResult } from "../../output/format.js";
-import { WebseekError } from "../../utils/error.js";
+import { appendUsageRecord } from "../../stats/usage-log.js";
+import { formatError, WebseekError } from "../../utils/error.js";
 import type { Logger } from "../../utils/logger.js";
 import { wrapCommand } from "../wrap-command.js";
 
@@ -63,6 +64,10 @@ export async function runSearchCommand(params: {
 }): Promise<void> {
   const request = toSearchRequest({ queryParts: params.queryParts, options: params.options });
   const result = await runSearch(request);
+  await appendUsageRecord({
+    result,
+    onError: (error) => params.logger.warn(`could not record usage: ${formatError(error)}`),
+  });
   params.logger.result(formatResult({ result, json: Boolean(params.options.json) }));
 }
 

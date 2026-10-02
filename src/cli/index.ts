@@ -5,6 +5,7 @@
  * Two modes:
  *   webseek <query> --provider <name>   run a one-off web search (root command)
  *   webseek mcp                         start the MCP server (stdio)
+ *   webseek stats                       summarize the locally recorded usage
  */
 
 import { readFileSync } from "node:fs";
@@ -15,6 +16,7 @@ import { Command } from "commander";
 import { formatError } from "../utils/error.js";
 import { registerMcpCommand } from "./commands/mcp.js";
 import { registerSearchCommand } from "./commands/search.js";
+import { registerStatsCommand } from "./commands/stats.js";
 
 function readPackageVersion(dir: string): string | undefined {
   try {
@@ -47,10 +49,14 @@ function buildProgram(): Command {
   program
     .name("webseek")
     .description("Unified multi-provider web search (CLI + MCP server)")
-    .version(version, "-v, --version", "Show version");
+    .version(version, "-v, --version", "Show version")
+    // Options after a subcommand name belong to the subcommand, so `stats -p`
+    // is not taken by the root search command's `-p`.
+    .enablePositionalOptions();
 
   registerSearchCommand(program);
   registerMcpCommand({ program, version });
+  registerStatsCommand(program);
 
   return program;
 }

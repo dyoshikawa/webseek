@@ -1,7 +1,8 @@
 /**
  * List-price cost estimation for a search, in USD.
  *
- * Prices are the providers' published pay-as-you-go rates (checked 2026-09-25)
+ * Prices are the providers' published pay-as-you-go rates (checked 2026-09-25;
+ * OpenAI GPT-6 and GPT-5.6 rows checked 2026-10-15)
  * and ignore free allowances (Google Custom Search's 100 queries/day, Gemini's
  * free grounded requests), batch/flex discounts, and long-context tiers — a
  * search prompt never gets near 200k tokens. Treat the result as an estimate.
@@ -34,6 +35,11 @@ interface ModelPrice {
 const OPENAI_SEARCH_PER_1K = 10;
 
 const OPENAI_PRICES: Record<string, ModelPrice> = {
+  "gpt-6-astra": openai({ input: 10, cachedInput: 1, output: 50 }),
+  "gpt-6.1-sol": openai({ input: 2, cachedInput: 0.1, output: 10 }),
+  "gpt-6-sol": openai({ input: 2, cachedInput: 0.2, output: 10 }),
+  "gpt-6-luna": openai({ input: 0.1, cachedInput: 0.01, output: 0.5 }),
+  "gpt-5.6-terra": openai({ input: 2, cachedInput: 0.2, output: 12 }),
   "gpt-5.5": openai({ input: 5, cachedInput: 0.5, output: 30 }),
   "gpt-5.4": openai({ input: 2.5, cachedInput: 0.25, output: 15 }),
   "gpt-5": openai({ input: 1.25, cachedInput: 0.125, output: 10 }),

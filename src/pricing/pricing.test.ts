@@ -25,6 +25,23 @@ describe("estimateCost", () => {
     expect(cost?.totalUsd).toBeCloseTo(0.25, 6);
   });
 
+  it.each([
+    // 8k × input + 2k × cached input + 1k × output per 1M.
+    { model: "gpt-6-astra", tokensUsd: 0.132 },
+    { model: "gpt-6.1-sol", tokensUsd: 0.0262 },
+    { model: "gpt-6-sol", tokensUsd: 0.0264 },
+    { model: "gpt-6-luna", tokensUsd: 0.00132 },
+    { model: "gpt-5.6-terra", tokensUsd: 0.0284 },
+  ])("prices $model at its own rates", ({ model, tokensUsd }) => {
+    const cost = estimateCost({
+      provider: "openai",
+      model,
+      usage: { inputTokens: 10_000, cachedInputTokens: 2_000, outputTokens: 1_000, searchCalls: 1 },
+    });
+    expect(cost?.tokensUsd).toBeCloseTo(tokensUsd, 6);
+    expect(cost?.searchUsd).toBeCloseTo(0.01, 6);
+  });
+
   it("does not mistake an unknown model for a known prefix", () => {
     const cost = estimateCost({
       provider: "openai",

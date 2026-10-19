@@ -5,6 +5,7 @@
  */
 
 import { formatUsd } from "../output/format.js";
+import { toSingleLine } from "../utils/sanitize.js";
 import type { ModelStats, UsageStats } from "./aggregate.js";
 
 export interface RenderStatsParams {
@@ -92,8 +93,9 @@ function renderModels(params: { models: ModelStats[]; limit?: number }): string[
 
 function modelName(model: ModelStats): string {
   // The model name comes from the provider's response; drop control characters
-  // so a hostile endpoint cannot smuggle terminal escape sequences into the report.
-  const name = model.model?.replace(/\p{Cc}/gu, "");
+  // so a hostile endpoint cannot smuggle terminal escape sequences into the report,
+  // and keep it on its table row.
+  const name = model.model && toSingleLine(model.model);
   return name ? `${model.provider}/${name}` : model.provider;
 }
 

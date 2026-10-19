@@ -81,4 +81,21 @@ describe("formatResult", () => {
     const text = formatResult({ result: { ...grounded, cost: undefined }, json: false });
     expect(text).toContain("1 search, cost unknown");
   });
+
+  it("strips control characters from remote strings in text output", () => {
+    const esc = "\u001b[31m";
+    const hostile: NormalizedSearchResult = {
+      ...grounded,
+      answer: `Line one\n\tLine two${esc}\u0007`,
+      results: [{ title: `Title${esc}`, url: `https://e.com/${esc}`, snippet: `S${esc}nip` }],
+      citations: [{ url: `https://src.dev${esc}`, title: `S${esc}rc` }],
+      searchQueries: [`q${esc}`],
+    };
+    const text = formatResult({ result: hostile, json: false });
+    expect(text).not.toMatch(/[^\P{Cc}\n\t]/u);
+    expect(text).toContain("Line one\n\tLine two[31m");
+    expect(text).toContain("1. Title[31m");
+    expect(text).toContain("[1] S[31mrc — https://src.dev[31m");
+    expect(text).toContain("Searches: q[31m");
+  });
 });

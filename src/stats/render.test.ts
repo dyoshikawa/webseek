@@ -85,6 +85,13 @@ describe("renderStats", () => {
     expect(text).toContain("openai/gpt[2Jx");
     expect(text).not.toContain("\u001b");
   });
+
+  it("keeps model names on their row and drops bidi controls", () => {
+    const hostile = { ...stats.models[0]!, model: "a\nb\tc\u202Ed" };
+    const text = renderStats({ ...base, stats: { ...stats, models: [hostile] }, models: true });
+    expect(text).toMatch(/^openai\/a b cd +/m);
+    expect(text).not.toContain("\u202E");
+  });
 });
 
 describe("compact", () => {

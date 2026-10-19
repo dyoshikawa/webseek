@@ -51,14 +51,14 @@ const BACKENDS: Record<GeminiBackend, BackendWire> = {
   "gemini-api": {
     searchToolField: "google_search",
     buildRequest: ({ model, apiKey, baseUrl }) => ({
-      url: `${baseUrl}/v1beta/models/${model}:generateContent`,
+      url: `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       headers: { "x-goog-api-key": apiKey, "content-type": "application/json" },
     }),
   },
   "vertex-express": {
     searchToolField: "googleSearch",
     buildRequest: ({ model, apiKey, baseUrl }) => ({
-      url: `${baseUrl}/v1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      url: `${baseUrl}/v1/publishers/google/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
       headers: { "content-type": "application/json" },
     }),
   },

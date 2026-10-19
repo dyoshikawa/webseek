@@ -7,6 +7,8 @@
  * `formatError` renders any thrown value into a single human-readable string.
  */
 
+import { toSingleLine } from "./sanitize.js";
+
 export type WebseekErrorCode =
   | "missing_config"
   | "auth_failed"
@@ -42,8 +44,16 @@ export function errorExitCode(error: unknown): number {
   return 1;
 }
 
-/** Render any thrown value into a single-line, user-facing message. */
+/**
+ * Render any thrown value into a single-line, user-facing message. Provider
+ * error bodies flow into these messages, so control characters are stripped
+ * and line breaks collapsed before the text reaches a terminal.
+ */
 export function formatError(error: unknown): string {
+  return toSingleLine(renderError(error));
+}
+
+function renderError(error: unknown): string {
   if (error instanceof WebseekError) {
     return `[${error.code}] ${error.message}`;
   }
@@ -53,5 +63,5 @@ export function formatError(error: unknown): string {
   if (typeof error === "string") {
     return error;
   }
-  return JSON.stringify(error);
+  return JSON.stringify(error) ?? String(error);
 }

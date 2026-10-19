@@ -4,6 +4,7 @@
  */
 
 import type { NormalizedSearchResult, SearchCost, SearchUsage } from "../providers/provider.js";
+import { stripControlChars } from "../utils/sanitize.js";
 
 export interface FormatParams {
   result: NormalizedSearchResult;
@@ -77,15 +78,6 @@ function formatText(result: NormalizedSearchResult): string {
   }
 
   return lines.join("\n").trimEnd();
-}
-
-/**
- * Drops control characters (except newline and tab) from strings that come
- * from a provider's response, so a hostile endpoint or search result cannot
- * smuggle terminal escape sequences into the text output.
- */
-export function stripControlChars(value: string): string {
-  return value.replace(/[^\P{Cc}\n\t]/gu, "");
 }
 
 interface FormatUsageParams {

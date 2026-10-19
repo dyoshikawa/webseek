@@ -140,22 +140,30 @@ describe("gemini provider", () => {
     expect(JSON.parse(String(request?.init?.body)).tools).toEqual([{ googleSearch: {} }]);
   });
 
-  it("percent-encodes the model so it cannot rewrite the request path", async () => {
-    const fake = createFakeFetch([{ body: groundedBody }]);
-    const provider = createGeminiProvider({
-      config: {
-        apiKey: "g-key",
-        backend: "gemini-api",
-        baseUrl: "https://generativelanguage.googleapis.com",
-      },
-    });
+  it.each([
+    {
+      backend: "gemini-api" as const,
+      baseUrl: "https://generativelanguage.googleapis.com",
+      expected:
+        "https://generativelanguage.googleapis.com/v1beta/models/..%2F..%2Fx%3Fy%23z:generateContent",
+    },
+    {
+      backend: "vertex-express" as const,
+      baseUrl: "https://aiplatform.googleapis.com",
+      expected:
+        "https://aiplatform.googleapis.com/v1/publishers/google/models/..%2F..%2Fx%3Fy%23z:generateContent?key=g-key",
+    },
+  ])(
+    "$backend backend: percent-encodes the model so it cannot rewrite the request path",
+    async ({ backend, baseUrl, expected }) => {
+      const fake = createFakeFetch([{ body: groundedBody }]);
+      const provider = createGeminiProvider({ config: { apiKey: "g-key", backend, baseUrl } });
 
-    await provider.search({ query: "q", model: "../../x?y#z", fetchImpl: fake.fetchImpl });
+      await provider.search({ query: "q", model: "../../x?y#z", fetchImpl: fake.fetchImpl });
 
-    expect(fake.requests[0]?.url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/..%2F..%2Fx%3Fy%23z:generateContent",
-    );
-  });
+      expect(fake.requests[0]?.url).toBe(expected);
+    },
+  );
 
   it("returns an empty answer when the model did not ground", async () => {
     const fake = createFakeFetch([

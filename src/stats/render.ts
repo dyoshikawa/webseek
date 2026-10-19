@@ -5,6 +5,7 @@
  */
 
 import { formatUsd } from "../output/format.js";
+import { stripControlChars } from "../utils/sanitize.js";
 import type { ModelStats, UsageStats } from "./aggregate.js";
 
 export interface RenderStatsParams {
@@ -92,8 +93,10 @@ function renderModels(params: { models: ModelStats[]; limit?: number }): string[
 
 function modelName(model: ModelStats): string {
   // The model name comes from the provider's response; drop control characters
-  // so a hostile endpoint cannot smuggle terminal escape sequences into the report.
-  const name = model.model?.replace(/\p{Cc}/gu, "");
+  // so a hostile endpoint cannot smuggle terminal escape sequences into the report,
+  // and newlines/tabs so the name stays on its table row.
+  const name =
+    model.model === undefined ? undefined : stripControlChars(model.model).replace(/[\n\t]/g, "");
   return name ? `${model.provider}/${name}` : model.provider;
 }
 

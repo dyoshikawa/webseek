@@ -40,16 +40,18 @@ function formatText(result: NormalizedSearchResult): string {
   const lines: string[] = [];
 
   if (result.answer) {
-    lines.push(result.answer.trim(), "");
+    lines.push(stripControlChars(result.answer).trim(), "");
   }
 
   if (result.results.length > 0) {
     lines.push("Results:");
     result.results.forEach((item, index) => {
-      lines.push(`${index + 1}. ${item.title || item.url}`);
-      lines.push(`   ${item.url}`);
+      const title = stripControlChars(item.title);
+      const url = stripControlChars(item.url);
+      lines.push(`${index + 1}. ${title || url}`);
+      lines.push(`   ${url}`);
       if (item.snippet) {
-        lines.push(`   ${item.snippet}`);
+        lines.push(`   ${stripControlChars(item.snippet)}`);
       }
     });
     lines.push("");
@@ -58,14 +60,16 @@ function formatText(result: NormalizedSearchResult): string {
   if (result.citations.length > 0) {
     lines.push("Sources:");
     result.citations.forEach((citation, index) => {
-      const label = citation.title ? `${citation.title} — ${citation.url}` : citation.url;
+      const url = stripControlChars(citation.url);
+      const title = citation.title ? stripControlChars(citation.title) : "";
+      const label = title ? `${title} — ${url}` : url;
       lines.push(`  [${index + 1}] ${label}`);
     });
     lines.push("");
   }
 
   if (result.searchQueries.length > 0) {
-    lines.push(`Searches: ${result.searchQueries.join(" | ")}`);
+    lines.push(`Searches: ${result.searchQueries.map(stripControlChars).join(" | ")}`);
   }
 
   if (result.usage) {
@@ -73,6 +77,15 @@ function formatText(result: NormalizedSearchResult): string {
   }
 
   return lines.join("\n").trimEnd();
+}
+
+/**
+ * Drops control characters (except newline and tab) from strings that come
+ * from a provider's response, so a hostile endpoint or search result cannot
+ * smuggle terminal escape sequences into the text output.
+ */
+export function stripControlChars(value: string): string {
+  return value.replace(/[^\P{Cc}\n\t]/gu, "");
 }
 
 interface FormatUsageParams {

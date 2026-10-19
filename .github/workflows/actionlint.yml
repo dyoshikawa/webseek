@@ -26,8 +26,9 @@ jobs:
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck
 
+      # The download script is pinned to the commit of the v1.7.11 tag rather than the moving main branch.
       - name: Install actionlint
-        run: bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) 1.7.11
+        run: bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/393031adb9afb225ee52ae2ccd7a5af5525e03e8/scripts/download-actionlint.bash) 1.7.11
 
       - name: Run actionlint
         run: ./actionlint -color

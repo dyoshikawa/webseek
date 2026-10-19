@@ -140,6 +140,23 @@ describe("gemini provider", () => {
     expect(JSON.parse(String(request?.init?.body)).tools).toEqual([{ googleSearch: {} }]);
   });
 
+  it("percent-encodes the model so it cannot rewrite the request path", async () => {
+    const fake = createFakeFetch([{ body: groundedBody }]);
+    const provider = createGeminiProvider({
+      config: {
+        apiKey: "g-key",
+        backend: "gemini-api",
+        baseUrl: "https://generativelanguage.googleapis.com",
+      },
+    });
+
+    await provider.search({ query: "q", model: "../../x?y#z", fetchImpl: fake.fetchImpl });
+
+    expect(fake.requests[0]?.url).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/..%2F..%2Fx%3Fy%23z:generateContent",
+    );
+  });
+
   it("returns an empty answer when the model did not ground", async () => {
     const fake = createFakeFetch([
       { body: { candidates: [{ content: { parts: [{ text: "" }] } }] } },

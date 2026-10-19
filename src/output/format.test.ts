@@ -87,14 +87,14 @@ describe("formatResult", () => {
     const hostile: NormalizedSearchResult = {
       ...grounded,
       answer: `Line one\n\tLine two${esc}\u0007`,
-      results: [{ title: `T${esc}itle`, url: `https://e.com/${esc}`, snippet: `S${esc}nip` }],
+      results: [{ title: `Title${esc}`, url: `https://e.com/${esc}`, snippet: `S${esc}nip` }],
       citations: [{ url: `https://src.dev${esc}`, title: `S${esc}rc` }],
       searchQueries: [`q${esc}`],
     };
     const text = formatResult({ result: hostile, json: false });
     expect(text).not.toMatch(/[^\P{Cc}\n\t]/u);
     expect(text).toContain("Line one\n\tLine two[31m");
-    expect(text).toContain("1. T[31mitle");
+    expect(text).toContain("1. Title[31m");
     expect(text).toContain("[1] S[31mrc — https://src.dev[31m");
     expect(text).toContain("Searches: q[31m");
   });

@@ -7,7 +7,7 @@
  * `formatError` renders any thrown value into a single human-readable string.
  */
 
-import { stripControlChars } from "./sanitize.js";
+import { toSingleLine } from "./sanitize.js";
 
 export type WebseekErrorCode =
   | "missing_config"
@@ -47,10 +47,10 @@ export function errorExitCode(error: unknown): number {
 /**
  * Render any thrown value into a single-line, user-facing message. Provider
  * error bodies flow into these messages, so control characters are stripped
- * before the text reaches a terminal.
+ * and line breaks collapsed before the text reaches a terminal.
  */
 export function formatError(error: unknown): string {
-  return stripControlChars(renderError(error));
+  return toSingleLine(renderError(error));
 }
 
 function renderError(error: unknown): string {

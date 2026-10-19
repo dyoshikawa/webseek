@@ -16,6 +16,10 @@ describe("formatError", () => {
     expect(formatError("a\u009bb")).toBe("ab");
   });
 
+  it("keeps the message on one line", () => {
+    expect(formatError(new Error("bad\n[ok] search succeeded"))).toBe("bad [ok] search succeeded");
+  });
+
   it("renders values JSON cannot serialize", () => {
     expect(formatError(undefined)).toBe("undefined");
     expect(formatError({ a: 1 })).toBe('{"a":1}');

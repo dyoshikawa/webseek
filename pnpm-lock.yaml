@@ -2240,8 +2240,8 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mcp-proxy@6.7.19:
-    resolution: {integrity: sha512-Nbfjj4VwVka1yAR/0fdD2G8borGOfjHEmfUzPFCH2nfQUNjWIij6s3gXMUhi2GUYE3FpUu8iFKE75ZQe/g1n8Q==}
+  mcp-proxy@6.7.21:
+    resolution: {integrity: sha512-btzC2YoQKgVc6mA8dElcmaX7nz20WcdteJRq8Je/9pufORT+fBikwIne1juyYvRNSLyTw4U2fjUuy9q82O+RaQ==}
     hasBin: true
 
   media-typer@1.1.1:
@@ -4603,7 +4603,7 @@ snapshots:
       file-type: 21.3.4(supports-color@10.2.2)
       fuse.js: 7.5.0
       hono: 4.13.13
-      mcp-proxy: 6.7.19(supports-color@10.2.2)
+      mcp-proxy: 6.7.21(supports-color@10.2.2)
       strict-event-emitter-types: 2.0.0
       uri-templates: 0.2.0
       xsschema: 0.4.4(@valibot/to-json-schema@1.8.0(valibot@1.5.0(typescript@7.0.2)))(effect@3.22.2)(sury@10.0.4)(zod-to-json-schema@3.25.2(zod@4.6.7))(zod@4.6.7)
@@ -5026,7 +5026,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-proxy@6.7.19(supports-color@10.2.2):
+  mcp-proxy@6.7.21(supports-color@10.2.2):
     dependencies:
       '@modelcontextprotocol/client': 2.3.1
       '@modelcontextprotocol/server': 2.3.1

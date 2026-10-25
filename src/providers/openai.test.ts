@@ -177,4 +177,29 @@ describe("openai provider", () => {
       code: "rate_limited",
     });
   });
+
+  it.each([
+    { status: 401, code: "auth_failed" },
+    { status: 403, code: "provider_error" },
+    { status: 429, code: "rate_limited" },
+    { status: 500, code: "provider_error" },
+  ])("maps HTTP $status to $code with the provider's message", async ({ status, code }) => {
+    const fake = createFakeFetch([{ status, body: { error: { message: "upstream says no" } } }]);
+    const provider = createOpenAIProvider({ config });
+
+    await expect(provider.search({ query: "q", fetchImpl: fake.fetchImpl })).rejects.toMatchObject({
+      code,
+      message: "upstream says no",
+    });
+  });
+
+  it("falls back to a generic message when the error body has none", async () => {
+    const fake = createFakeFetch([{ status: 502, body: "bad gateway" }]);
+    const provider = createOpenAIProvider({ config });
+
+    await expect(provider.search({ query: "q", fetchImpl: fake.fetchImpl })).rejects.toMatchObject({
+      code: "provider_error",
+      message: "OpenAI web search request failed (HTTP 502).",
+    });
+  });
 });

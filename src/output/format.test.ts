@@ -50,6 +50,17 @@ describe("formatResult", () => {
     expect(json.cost).toEqual(grounded.cost);
   });
 
+  it("escapes terminal-reaching control characters in JSON and --raw output", () => {
+    const hostile = "x\u009b31m\u202ey\u007f";
+    const text = formatResult({
+      result: { ...grounded, answer: hostile, raw: { body: hostile } },
+      json: true,
+    });
+    expect(text).not.toMatch(/[\u007f-\u009f\u202e]/u);
+    expect(JSON.parse(text).answer).toBe(hostile);
+    expect(JSON.parse(text).raw.body).toBe(hostile);
+  });
+
   it("renders token usage and the estimated cost", () => {
     const text = formatResult({ result: grounded, json: false });
     expect(text).toContain("Usage: 1,500 tokens (1,200 in, 300 out), 1 search, ~$0.0250");

@@ -4,7 +4,7 @@
  */
 
 import type { NormalizedSearchResult, SearchCost, SearchUsage } from "../providers/provider.js";
-import { stripControlChars } from "../utils/sanitize.js";
+import { stringifyJson, stripControlChars } from "../utils/sanitize.js";
 
 export interface FormatParams {
   result: NormalizedSearchResult;
@@ -34,7 +34,7 @@ function formatJson(result: NormalizedSearchResult): string {
   if (result.raw !== undefined) {
     payload.raw = result.raw;
   }
-  return JSON.stringify(payload, null, 2);
+  return stringifyJson(payload, 2);
 }
 
 function formatText(result: NormalizedSearchResult): string {

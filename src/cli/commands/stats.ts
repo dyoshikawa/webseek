@@ -14,6 +14,7 @@ import { renderStats } from "../../stats/render.js";
 import { readUsageRecords } from "../../stats/usage-log.js";
 import { WebseekError } from "../../utils/error.js";
 import type { Logger } from "../../utils/logger.js";
+import { stringifyJson } from "../../utils/sanitize.js";
 import { wrapCommand } from "../wrap-command.js";
 
 export interface StatsCommandOptions {
@@ -106,7 +107,7 @@ export async function runStatsCommand(params: {
   if (request.json) {
     const models =
       request.limit === undefined ? stats.models : stats.models.slice(0, request.limit);
-    params.logger.result(JSON.stringify({ ...stats, models }, null, 2));
+    params.logger.result(stringifyJson({ ...stats, models }, 2));
     return;
   }
   params.logger.result(

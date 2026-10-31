@@ -45,20 +45,20 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "vp pack",
     "start": "node dist/cli/index.mjs",
     "dev": "tsx src/cli/index.ts",
-    "fmt": "oxfmt .",
-    "fmt:check": "oxfmt --check .",
-    "oxlint": "oxlint . --max-warnings 0",
-    "oxlint:fix": "oxlint . --fix --max-warnings 0",
+    "fmt": "vp fmt",
+    "fmt:check": "vp fmt --check",
+    "oxlint": "vp lint --max-warnings 0",
+    "oxlint:fix": "vp lint --fix --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "cspell": "cspell --no-progress --gitignore .",
     "secretlint": "secretlint --secretlintignore .gitignore \"**/*\"",
-    "check": "pnpm run fmt:check && pnpm run oxlint && pnpm run typecheck",
-    "fix": "pnpm run fmt && pnpm run oxlint:fix",
-    "test": "vitest run --config vitest.config.ts --silent=true",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts --silent=false",
+    "check": "vp check --deny-warnings && pnpm run typecheck",
+    "fix": "vp check --fix",
+    "test": "vp test run --config vitest.config.ts --silent=true",
+    "test:e2e": "vp test run --config vitest.e2e.config.ts --silent=false",
     "sync:skill-docs": "tsx scripts/sync-skill-docs.ts",
     "check:sync-skill-docs": "tsx scripts/check-skill-docs-sync.ts",
     "check:codex-config": "tsx scripts/check-codex-config.ts",
@@ -67,11 +67,8 @@
     "cicheck": "pnpm run cicheck:code && pnpm run cicheck:content",
     "generate": "rulesync generate",
     "gitignore": "rulesync gitignore",
-    "prepare": "simple-git-hooks",
+    "prepare": "vp config --no-agent",
     "prepublishOnly": "pnpm run build"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "pnpm exec lint-staged"
   },
   "engines": {
     "node": ">=20.11.0"
@@ -85,19 +82,16 @@
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^26.0.0",
     "cspell": "10.4.0",
-    "lint-staged": "17.6.0",
-    "oxfmt": "0.75.0",
-    "oxlint": "1.90.0",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
     "repomix": "1.18.1",
     "resend": "6.35.0",
     "rulesync": "^43.2.0",
     "secretlint": "13.1.0",
-    "simple-git-hooks": "2.14.0",
     "smol-toml": "1.9.1",
-    "tsdown": "^0.23.0",
     "tsx": "^4.22.4",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vite-plus": "catalog:"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

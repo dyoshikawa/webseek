@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 import { aggregateUsage, resolveStatsRange } from "./aggregate.js";
 import type { UsageRecord } from "./usage-log.js";

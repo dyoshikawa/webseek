@@ -76,7 +76,7 @@ npx webseek "..." -p google   # or run without installing
 
 ```bash
 pnpm install
-pnpm build      # dual-format (ESM + CJS) build via tsdown; exposes the `webseek` bin
+pnpm build      # dual-format (ESM + CJS) build via `vp pack` (Vite+); exposes the `webseek` bin
 ```
 
 During development you can run without building via `pnpm dev -- <args>` (runs

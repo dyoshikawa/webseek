@@ -178,3 +178,4 @@ rulesync.local.jsonc
 **/.devinignore
 **/.vibeignore
 !.rulesync/.aiignore
+.vitest/

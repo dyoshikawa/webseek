@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 import { createFakeFetch } from "../test-utils/fake-fetch.js";
 import { createGeminiProvider } from "./gemini.js";

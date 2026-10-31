@@ -22,7 +22,8 @@ import { z } from "zod";
 
 import type { GeminiBackend, GeminiConfig } from "../config/env.js";
 import { estimateCost } from "../pricing/pricing.js";
-import { WebseekError } from "../utils/error.js";
+import type { WebseekError } from "../utils/error.js";
+import { toProviderHttpError } from "./http-error.js";
 import type {
   Citation,
   NormalizedSearchResult,
@@ -215,11 +216,5 @@ function toError(params: ToErrorParams): WebseekError {
   const message =
     (parsed.success ? parsed.data.error?.message : undefined) ??
     `Gemini grounding request failed (HTTP ${params.status}).`;
-  if (params.status === 401 || params.status === 403) {
-    return new WebseekError({ code: "auth_failed", message });
-  }
-  if (params.status === 429) {
-    return new WebseekError({ code: "rate_limited", message });
-  }
-  return new WebseekError({ code: "provider_error", message });
+  return toProviderHttpError({ status: params.status, message, authFailedStatuses: [401, 403] });
 }

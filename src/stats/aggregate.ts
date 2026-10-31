@@ -4,7 +4,7 @@
  * per-model breakdown.
  */
 
-import type { ProviderName } from "../providers/provider.js";
+import type { ProviderName, SearchCost } from "../providers/provider.js";
 import type { UsageRecord } from "./usage-log.js";
 
 export interface StatsRange {
@@ -57,12 +57,6 @@ export interface StatsTokens {
   total: number;
 }
 
-export interface StatsCost {
-  totalUsd: number;
-  tokensUsd: number;
-  searchUsd: number;
-}
-
 export interface ModelStats {
   provider: ProviderName;
   /** Absent for providers without a model (Google Custom Search). */
@@ -82,7 +76,8 @@ export interface UsageStats {
   /** Searches the providers ran on our behalf (tool calls, grounding queries, SERP requests). */
   searchCalls: number;
   tokens: StatsTokens;
-  cost: StatsCost;
+  /** The summed per-search cost estimates. */
+  cost: SearchCost;
   /** Searches with no cost estimate (unknown model price); excluded from `cost`. */
   unpricedSearches: number;
   /** Distinct local calendar days with at least one search. */

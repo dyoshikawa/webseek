@@ -14,20 +14,13 @@ export interface Logger {
   result(text: string): void;
 }
 
-export interface CreateConsoleLoggerParams {
-  /** Suppress info/warn diagnostics. Errors and results are always emitted. */
-  silent?: boolean;
-  /** When true, diagnostics are written to stderr only (used by the MCP server). */
-  diagnosticsOnly?: boolean;
-}
-
 function writeErr(message: string): void {
   process.stderr.write(`${message}\n`);
 }
 
-export function createConsoleLogger(params: CreateConsoleLoggerParams = {}): Logger {
-  const silent = params.silent ?? process.env.NODE_ENV === "test";
-  const diagnosticsOnly = params.diagnosticsOnly ?? false;
+export function createConsoleLogger(): Logger {
+  // Info/warn diagnostics are suppressed under tests; errors and results are always emitted.
+  const silent = process.env.NODE_ENV === "test";
 
   return {
     info: (message) => {
@@ -44,10 +37,6 @@ export function createConsoleLogger(params: CreateConsoleLoggerParams = {}): Log
       writeErr(message);
     },
     result: (text) => {
-      if (diagnosticsOnly) {
-        writeErr(text);
-        return;
-      }
       process.stdout.write(`${text}\n`);
     },
   };

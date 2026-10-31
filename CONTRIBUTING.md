@@ -14,7 +14,8 @@ pnpm cicheck        # run all checks (style, types, tests, spelling, secrets)
 ```
 
 Before committing, run `pnpm cicheck` and make sure it passes. A pre-commit hook
-runs secretlint automatically — please do not bypass it with `--no-verify`.
+(`vp staged`) runs secretlint automatically — please do not bypass it with
+`--no-verify`.
 
 ## Pull requests
 

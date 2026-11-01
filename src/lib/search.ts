@@ -4,15 +4,18 @@
  */
 
 import type { Env, GeminiBackend } from "../config/env.js";
-import { resolveGeminiConfig, resolveGoogleCseConfig, resolveOpenAIConfig } from "../config/env.js";
+import {
+  GEMINI_BACKENDS,
+  resolveGeminiConfig,
+  resolveGoogleCseConfig,
+  resolveOpenAIConfig,
+} from "../config/env.js";
 import { createGeminiProvider } from "../providers/gemini.js";
 import { createGoogleCseProvider } from "../providers/google-cse.js";
 import { createOpenAIProvider } from "../providers/openai.js";
+import { PROVIDER_NAMES } from "../providers/provider.js";
 import type { NormalizedSearchResult, ProviderName } from "../providers/provider.js";
 import { WebseekError } from "../utils/error.js";
-
-export const PROVIDER_NAMES = ["openai", "google", "gemini"] as const;
-export const GEMINI_BACKENDS = ["gemini-api", "vertex-express"] as const;
 
 export interface RunSearchParams {
   provider: ProviderName;

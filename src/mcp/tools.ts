@@ -5,9 +5,9 @@
 
 import { z } from "zod";
 
-import type { Env } from "../config/env.js";
-import { GEMINI_BACKENDS, PROVIDER_NAMES, runSearch } from "../lib/search.js";
-import type { NormalizedSearchResult } from "../providers/provider.js";
+import { type Env, GEMINI_BACKENDS } from "../config/env.js";
+import { runSearch } from "../lib/search.js";
+import { type NormalizedSearchResult, PROVIDER_NAMES } from "../providers/provider.js";
 import { formatError } from "../utils/error.js";
 
 export const webSearchInputShape = {

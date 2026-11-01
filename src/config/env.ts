@@ -82,7 +82,9 @@ export function resolveGoogleCseConfig(params: ResolveGoogleCseConfigParams = {}
   };
 }
 
-export type GeminiBackend = "gemini-api" | "vertex-express";
+export const GEMINI_BACKENDS = ["gemini-api", "vertex-express"] as const;
+
+export type GeminiBackend = (typeof GEMINI_BACKENDS)[number];
 
 export interface ResolveGeminiConfigParams {
   env?: Env;

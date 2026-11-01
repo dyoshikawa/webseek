@@ -7,10 +7,11 @@
  */
 
 // Core search
-export { GEMINI_BACKENDS, PROVIDER_NAMES, runSearch } from "./lib/search.js";
+export { runSearch } from "./lib/search.js";
 export type { RunSearchParams } from "./lib/search.js";
 
 // Result and provider types
+export { PROVIDER_NAMES } from "./providers/provider.js";
 export type {
   Citation,
   NormalizedSearchResult,
@@ -26,7 +27,8 @@ export type {
 export { estimateCost } from "./pricing/pricing.js";
 export type { EstimateCostParams } from "./pricing/pricing.js";
 
-// Environment configuration types
+// Environment configuration
+export { GEMINI_BACKENDS } from "./config/env.js";
 export type { Env, GeminiBackend } from "./config/env.js";
 
 // Errors

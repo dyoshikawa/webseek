@@ -8,7 +8,9 @@
  *   synthesized `answer` plus `citations` and the underlying `searchQueries`.
  */
 
-export type ProviderName = "openai" | "google" | "gemini";
+export const PROVIDER_NAMES = ["openai", "google", "gemini"] as const;
+
+export type ProviderName = (typeof PROVIDER_NAMES)[number];
 
 /** A single SERP-style result (one link). */
 export interface SearchResultItem {

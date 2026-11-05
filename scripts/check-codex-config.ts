@@ -25,8 +25,8 @@ const codexConfigSchema = z.looseObject({
   approval_policy: z.literal("on-request"),
   approvals_reviewer: z.literal("auto_review"),
   mcp_servers: z.looseObject({
+    // Codex tells a stdio server by its `command`; rulesync writes no `type`.
     serena: z.looseObject({
-      type: z.literal("stdio"),
       command: z.literal("uvx"),
       args: z.array(z.string()),
     }),
@@ -89,7 +89,7 @@ function hasExpectedCodexSerenaServer({
   server: z.infer<typeof codexConfigSchema>["mcp_servers"]["serena"];
 }): boolean {
   return (
-    hasExactKeys({ record: server, keys: ["args", "command", "type"] }) &&
+    hasExactKeys({ record: server, keys: ["args", "command"] }) &&
     hasExpectedSerenaArgs({ args: server.args })
   );
 }

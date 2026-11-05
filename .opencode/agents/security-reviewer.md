@@ -4,9 +4,7 @@ description: >-
   specifically looking for vulnerabilities and malicious code. This agent can be
   called by the user explicitly only.
 mode: subagent
-name: security-reviewer
 ---
-
 Reviews code specifically for vulnerabilities and malicious code.
 If a GitHub PR URL is provided, it reviews that PR; otherwise, it reviews the PR
 associated with the current branch.

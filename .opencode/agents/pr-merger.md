@@ -1,9 +1,7 @@
 ---
 description: Use this agent when you need to merge GitHub pull requests.
 mode: subagent
-name: pr-merger
 ---
-
 Use the `gh pr merge {Number} --admin --squash` command format as specified in project instructions.
 
 If the PR number is not provided and PR linked current branch exists, that PR should be merged.

@@ -4,9 +4,7 @@ description: >-
   on general software engineering principles like DRY, SOLID, maintainability,
   and best practices.
 mode: subagent
-name: code-reviewer
 ---
-
 Reviews code from a general software engineering perspective.
 
 - Adherence to DRY principles

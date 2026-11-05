@@ -65,8 +65,8 @@
     "cicheck:code": "pnpm run check && pnpm run test",
     "cicheck:content": "pnpm run check:sync-skill-docs && pnpm run check:codex-config && pnpm run cspell && pnpm run secretlint",
     "cicheck": "pnpm run cicheck:code && pnpm run cicheck:content",
-    "generate": "rulesync generate",
-    "gitignore": "rulesync gitignore",
+    "generate": "pnpm dlx rulesync@latest generate",
+    "gitignore": "pnpm dlx rulesync@latest gitignore",
     "prepare": "vp config --no-agent",
     "prepublishOnly": "pnpm run build"
   },
@@ -86,7 +86,6 @@
     "oxlint": "catalog:",
     "repomix": "1.18.1",
     "resend": "6.35.0",
-    "rulesync": "^43.2.0",
     "secretlint": "13.1.0",
     "smol-toml": "1.9.1",
     "tsx": "^4.22.4",

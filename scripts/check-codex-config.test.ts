@@ -23,7 +23,6 @@ approval_policy = "on-request"
 approvals_reviewer = "auto_review"
 
 [mcp_servers.serena]
-type = "stdio"
 command = "uvx"
 args = ${JSON.stringify(serenaArgs)}
 

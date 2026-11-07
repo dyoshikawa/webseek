@@ -183,18 +183,22 @@ Given a PR number or URL:
    git worktree list
    ```
 
-   If it exists, remove it first: `git gtr rm <branch>`
+   If it exists, remove it first: `git gtr rm "$branch"` (see step 3 for `$branch`)
 
-3. **Fetch the PR ref** into a local branch (use `--force` to handle diverged history from force-pushes)
+3. **Fetch the PR ref** into a local branch (use `--force` to handle diverged history from force-pushes).
+   The head branch name is chosen by the PR author, so never type it into a command. Name the local branch `pr-<PR_NUMBER>`; use the head branch name only when it contains nothing but letters, digits, `.`, `_`, `-` and `/`, and then only through a variable:
 
    ```bash
-   git fetch origin pull/<PR_NUMBER>/head:<BRANCH_NAME> --force
+   branch="pr-<PR_NUMBER>"
+   # or, after checking the name as above:
+   # branch="$(gh pr view <PR_NUMBER> --json headRefName --jq .headRefName)"
+   git fetch origin "pull/<PR_NUMBER>/head:$branch" --force
    ```
 
 4. **Create the worktree** with `--track local` since it's a local-only branch
 
    ```bash
-   git gtr new <BRANCH_NAME> --track local
+   git gtr new "$branch" --track local
    ```
 
 5. **Verify**
@@ -206,20 +210,14 @@ Given a PR number or URL:
 
 ```bash
 gh pr view 1223 --json headRefName,isCrossRepository
-git fetch origin pull/1223/head:fix/comprehensive-file-formats-docs --force
-git gtr new fix/comprehensive-file-formats-docs --track local
+branch="pr-1223"
+git fetch origin "pull/1223/head:$branch" --force
+git gtr new "$branch" --track local
 git gtr list
-```
-
-### Shortening long branch names
-
-```bash
-git fetch origin pull/1223/head:pr-1223 --force
-git gtr new pr-1223 --track local
 ```
 
 ### Common errors
 
-- **"refusing to fetch into branch checked out at..."**: A worktree with that branch exists. `git gtr rm <branch>` first.
+- **"refusing to fetch into branch checked out at..."**: A worktree with that branch exists. `git gtr rm "$branch"` first.
 - **"non-fast-forward" rejected**: Local branch diverged. Add `--force` to the fetch.
 - **Both errors**: Remove the worktree first, then fetch with `--force`.

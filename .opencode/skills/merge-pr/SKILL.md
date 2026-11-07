@@ -98,7 +98,8 @@ After merging:
 If the local branch exists, please clean up the local branch. Execute:
 
 ```bash
-git checkout main && git pull --prune && git branch -d <branch-name>
+branch="$(gh pr view <pr_number> --json headRefName --jq .headRefName)"
+git checkout main && git pull --prune && git branch -d -- "$branch"
 ```
 
-Where `<branch-name>` is the head branch name from Step 2 (e.g., `fix/import-targets`).
+The head branch name is chosen by the PR author (for a fork PR, anyone). Never type it into the command yourself: read it into a variable as above and always use it as `"$branch"`, so the shell never interprets characters in it.

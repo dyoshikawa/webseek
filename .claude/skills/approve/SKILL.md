@@ -58,11 +58,18 @@ gh pr review <pr_number> --approve
 
 **Important**: Only approve ONE PR at a time. If multiple PRs are somehow specified, ask the user which single PR to approve.
 
-If you want to add a comment along with the approval, use the `--body` option:
+If you want to add a comment along with the approval, pass it with `--body-file`:
 
 ```bash
-gh pr review <pr_number> --approve --body "<approval_comment>"
+body_file="$(mktemp)"
+cat > "$body_file" <<'BODY_EOF'
+<approval_comment>
+BODY_EOF
+gh pr review <pr_number> --approve --body-file "$body_file"
+rm -f "$body_file"
 ```
+
+Never put drafted text inside double quotes on the command line: the shell runs backticks and `$(...)` found inside double quotes, and drafted text often quotes untrusted issue or PR content. Write the text to a file through a single-quoted heredoc and pass the file instead.
 
 ## Step 4: Report Result
 

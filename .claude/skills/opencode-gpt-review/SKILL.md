@@ -26,15 +26,19 @@ If no PR URL or PR number is provided, use the PR associated with the current br
 
 ## 1. Run review-pr via opencode
 
-Run the following command to have the github-copilot/gpt-5.4 model execute the review-pr skill via opencode.
+Run the following command to have the github-copilot/gpt-5.4 model execute the review-pr-lite skill via opencode.
 
 ```bash
 opencode run \
+  --agent gpt-pr-reviewer \
   --model github-copilot/gpt-5.4 \
-  "review-pr スキルで ${PR_TARGET} をレビューしてください"
+  "review-pr-lite スキルで ${PR_TARGET} をレビューしてください"
 ```
 
+- `--agent gpt-pr-reviewer`: Run as the read-only reviewer agent (`.opencode/agents/gpt-pr-reviewer.md`). The PR content is untrusted and the run is headless, so this agent denies every tool by default and allows only reading the repository and read-only `gh pr view` / `gh pr diff` / `gh pr checks` / `git diff` / `git log` / `git show` / `git status` commands. Never drop this flag, and never add `--auto`.
+- `review-pr-lite`: The reviewer agent may not start subagents (they would not inherit its restrictions), so it uses the single-agent review skill.
 - `--model github-copilot/gpt-5.4`: Use the GPT-5.4 model.
+- `PR_TARGET` must be a PR number or a GitHub PR URL. Stop and ask the user if it is anything else.
 
 Capture all output from the command.
 

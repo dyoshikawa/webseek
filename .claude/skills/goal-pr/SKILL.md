@@ -88,7 +88,12 @@ on the local branch directly:
    ```bash
    git status
    git add <changed files>
-   git commit -m "<message>"
+   msg_file="$(mktemp)"
+   cat > "$msg_file" <<'BODY_EOF'
+   <message>
+   BODY_EOF
+   git commit -F "$msg_file"
+   rm -f "$msg_file"
    git push origin HEAD
    ```
 

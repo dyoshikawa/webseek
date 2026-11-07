@@ -4,7 +4,6 @@ description: >-
   Create a GitHub issue with detailed description, purpose, and appropriate
   labels
 ---
-
 # Create GitHub Issue
 
 ## Step 1: Gather Information
@@ -65,8 +64,15 @@ Then choose appropriate labels from the existing repository labels based on the 
 ## Step 5: Create the Issue
 
 ```bash
-gh issue create --title "<concise title>" --body "<drafted body>" --label "<label1>,<label2>,..."
+body_file="$(mktemp)"
+cat > "$body_file" <<'BODY_EOF'
+<drafted body>
+BODY_EOF
+gh issue create --title '<concise title>' --body-file "$body_file" --label '<label1>,<label2>,...'
+rm -f "$body_file"
 ```
+
+Never put drafted text inside double quotes on the command line: the shell runs backticks and `$(...)` found inside double quotes, and drafted text often quotes untrusted issue or PR content. Write the text to a file through a single-quoted heredoc and pass the file instead. Put the title in single quotes and leave out any single quote (`'`) from it.
 
 ## Step 6: Report Result
 

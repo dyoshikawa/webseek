@@ -68,14 +68,16 @@ If there is any ambiguity, show the candidate branches to the user and ask for c
 For merged branches, delete them safely:
 
 ```bash
-git branch -d <branch-name>
+git branch -d -- '<branch-name>'
 ```
 
 Only if the user explicitly approves force deletion for unmerged branches, use:
 
 ```bash
-git branch -D <branch-name>
+git branch -D -- '<branch-name>'
 ```
+
+Always put the branch name in single quotes after `--`. Branch names can come from other people (for example a local branch named after a fork PR's head branch), so skip and report any branch whose name contains characters other than letters, digits, `.`, `_`, `-` and `/` instead of deleting it.
 
 Delete branches one by one, not with a broad wildcard command.
 

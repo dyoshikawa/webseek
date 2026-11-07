@@ -4,7 +4,6 @@ description: >-
   Create a GitHub issue with detailed description, purpose, and appropriate
   labels
 ---
-
 # Create GitHub Issue
 
 ## Step 1: Gather Information
@@ -65,8 +64,20 @@ Then choose appropriate labels from the existing repository labels based on the 
 ## Step 5: Create the Issue
 
 ```bash
-gh issue create --title "<concise title>" --body "<drafted body>" --label "<label1>,<label2>,..."
+mktemp
+mktemp
 ```
+
+Write `<drafted body>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<concise title>` the same way into the second path (`<title_file>`).
+
+Then run:
+
+```bash
+gh issue create --title "$(cat '<title_file>')" --body-file '<body_file>' --label '<label1>,<label2>,...'
+rm -f '<body_file>' '<title_file>'
+```
+
+Never put drafted text on the command line or in a shell heredoc: it often quotes untrusted issue or PR content, the shell runs backticks and `$(...)` inside double quotes, and a quoted line can end a heredoc early. Create an empty file with `mktemp`, write the text into it with your file-writing tool (not through the shell), and pass the file. Write the title into its own `mktemp` file (`<title_file>`) the same way; `"$(cat '<title_file>')"` is safe because the shell does not re-evaluate what `cat` prints.
 
 ## Step 6: Report Result
 

@@ -177,21 +177,27 @@ Given a PR number or URL:
    gh pr view <PR_NUMBER> --json headRefName,isCrossRepository
    ```
 
+   Pick the local branch name now. The head branch name is chosen by the PR author, so never type it into a command. Name the local branch `pr-<PR_NUMBER>`; use the head branch name only when it contains nothing but letters, digits, `.`, `_`, `-` and `/`, and then only through a variable:
+
+   ```bash
+   branch="pr-<PR_NUMBER>"
+   # or, after checking the name as above:
+   # branch="$(gh pr view <PR_NUMBER> --json headRefName --jq .headRefName)"
+   ```
+
+   Shell variables do not survive between separate tool calls, so set `branch` again at the start of every later command that uses `"$branch"`.
+
 2. **Check for existing worktree** with the same branch name
 
    ```bash
    git worktree list
    ```
 
-   If it exists, remove it first: `git gtr rm "$branch"` (see step 3 for `$branch`)
+   If it exists, remove it first: `git gtr rm "$branch"`
 
-3. **Fetch the PR ref** into a local branch (use `--force` to handle diverged history from force-pushes).
-   The head branch name is chosen by the PR author, so never type it into a command. Name the local branch `pr-<PR_NUMBER>`; use the head branch name only when it contains nothing but letters, digits, `.`, `_`, `-` and `/`, and then only through a variable:
+3. **Fetch the PR ref** into a local branch (use `--force` to handle diverged history from force-pushes)
 
    ```bash
-   branch="pr-<PR_NUMBER>"
-   # or, after checking the name as above:
-   # branch="$(gh pr view <PR_NUMBER> --json headRefName --jq .headRefName)"
    git fetch origin "pull/<PR_NUMBER>/head:$branch" --force
    ```
 

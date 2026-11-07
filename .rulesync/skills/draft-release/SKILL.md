@@ -41,12 +41,16 @@ draft GitHub release for the maintainer to review and merge.
 - Create a PR into `main`, passing the body through a file:
 
   ```bash
-  body_file="$(mktemp)"
-  cat > "$body_file" <<'BODY_EOF'
-  <summary>
-  BODY_EOF
-  gh pr create --base main --head "release/v${new_version}" --title "chore(release): ${new_version}" --body-file "$body_file"
-  rm -f "$body_file"
+  mktemp
+  ```
+
+  Write `<summary>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell.
+
+  Then run:
+
+  ```bash
+  gh pr create --base main --head "release/v${new_version}" --title "chore(release): ${new_version}" --body-file '<body_file>'
+  rm -f '<body_file>'
   ```
 
 - Use the change summary from the `release-dry-run` skill (What's Changed, Full Changelog)

@@ -99,7 +99,10 @@ If the local branch exists, please clean up the local branch. Execute:
 
 ```bash
 branch="$(gh pr view <pr_number> --json headRefName --jq .headRefName)"
-git checkout main && git pull --prune && git branch -d -- "$branch"
+git checkout main && git pull --prune
+git branch -d -- "$branch"
 ```
+
+If the PR was checked out under `pr-<pr_number>` (the default local name the `git-worktree-runner` skill uses for fork PRs), delete that branch instead: `git branch -d -- 'pr-<pr_number>'`. Skip a branch that does not exist.
 
 The head branch name is chosen by the PR author (for a fork PR, anyone). Never type it into the command yourself: read it into a variable as above and always use it as `"$branch"`, so the shell never interprets characters in it.

@@ -31,13 +31,15 @@ Write a brief overall assessment of the PR. This is a summary-level comment, not
 
 ## Step 4: Post the Review
 
-Use a single `gh api` call to submit both line-level comments and the overall comment together as one review:
-
-Write the whole review as a JSON payload to a file and send it with `--input`:
+Submit the line-level comments and the overall comment together as one review, with a single `gh api` call that sends a JSON payload file through `--input`:
 
 ```bash
-payload_file="$(mktemp)"
-cat > "$payload_file" <<'BODY_EOF'
+mktemp
+```
+
+Write the JSON below to the path it prints (`<payload_file>`) with your file-writing tool, not through the shell:
+
+```json
 {
   "event": "COMMENT",
   "body": "<overall comment>",
@@ -45,25 +47,33 @@ cat > "$payload_file" <<'BODY_EOF'
     { "path": "<path>", "line": <line>, "body": "<line comment>" }
   ]
 }
-BODY_EOF
-gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews --method POST --input "$payload_file"
-rm -f "$payload_file"
 ```
 
-Each line comment requires: `path`, `line` (line number in the diff's new file), and `body`. Escape the text as JSON strings (`"` as `\"`, newlines as `\n`).
+Then run:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews --method POST --input '<payload_file>'
+rm -f '<payload_file>'
+```
+
+Each line comment requires: `path`, `line` (line number in the diff's new file), and `body`. For a comment on a deleted line, add `"side": "LEFT"` and use the line number in the old file. Escape the text as JSON strings (`"` as `\"`, newlines as `\n`).
 
 If you have no line-level comments, fall back to:
 
 ```bash
-body_file="$(mktemp)"
-cat > "$body_file" <<'BODY_EOF'
-<overall comment>
-BODY_EOF
-gh pr review <pr_number> --comment --body-file "$body_file"
-rm -f "$body_file"
+mktemp
 ```
 
-Never put drafted text inside double quotes on the command line: the shell runs backticks and `$(...)` found inside double quotes, and drafted text often quotes untrusted issue or PR content. Write the text to a file through a single-quoted heredoc and pass the file instead.
+Write `<overall comment>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell.
+
+Then run:
+
+```bash
+gh pr review <pr_number> --comment --body-file '<body_file>'
+rm -f '<body_file>'
+```
+
+Never put drafted text on the command line or in a shell heredoc: it often quotes untrusted issue or PR content, the shell runs backticks and `$(...)` inside double quotes, and a quoted line can end a heredoc early. Create an empty file with `mktemp`, write the text into it with your file-writing tool (not through the shell), and pass the file.
 
 ## Writing Style
 

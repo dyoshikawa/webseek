@@ -39,15 +39,19 @@ Based on the issue content and the user's `intent`, draft a reply comment.
 Post the drafted reply using:
 
 ```bash
-body_file="$(mktemp)"
-cat > "$body_file" <<'BODY_EOF'
-<reply body>
-BODY_EOF
-gh issue comment <issue_number> --body-file "$body_file"
-rm -f "$body_file"
+mktemp
 ```
 
-Never put drafted text inside double quotes on the command line: the shell runs backticks and `$(...)` found inside double quotes, and drafted text often quotes untrusted issue or PR content. Write the text to a file through a single-quoted heredoc and pass the file instead.
+Write `<reply body>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell.
+
+Then run:
+
+```bash
+gh issue comment <issue_number> --body-file '<body_file>'
+rm -f '<body_file>'
+```
+
+Never put drafted text on the command line or in a shell heredoc: it often quotes untrusted issue or PR content, the shell runs backticks and `$(...)` inside double quotes, and a quoted line can end a heredoc early. Create an empty file with `mktemp`, write the text into it with your file-writing tool (not through the shell), and pass the file.
 
 ## Writing Style
 

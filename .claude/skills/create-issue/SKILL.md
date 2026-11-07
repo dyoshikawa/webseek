@@ -64,15 +64,19 @@ Then choose appropriate labels from the existing repository labels based on the 
 ## Step 5: Create the Issue
 
 ```bash
-body_file="$(mktemp)"
-cat > "$body_file" <<'BODY_EOF'
-<drafted body>
-BODY_EOF
-gh issue create --title '<concise title>' --body-file "$body_file" --label '<label1>,<label2>,...'
-rm -f "$body_file"
+mktemp
 ```
 
-Never put drafted text inside double quotes on the command line: the shell runs backticks and `$(...)` found inside double quotes, and drafted text often quotes untrusted issue or PR content. Write the text to a file through a single-quoted heredoc and pass the file instead. Put the title in single quotes and leave out any single quote (`'`) from it.
+Write `<drafted body>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<concise title>` the same way into a second `mktemp` file (`<title_file>`).
+
+Then run:
+
+```bash
+gh issue create --title "$(cat '<title_file>')" --body-file '<body_file>' --label '<label1>,<label2>,...'
+rm -f '<body_file>' '<title_file>'
+```
+
+Never put drafted text on the command line or in a shell heredoc: it often quotes untrusted issue or PR content, the shell runs backticks and `$(...)` inside double quotes, and a quoted line can end a heredoc early. Create an empty file with `mktemp`, write the text into it with your file-writing tool (not through the shell), and pass the file. Write the title into its own `mktemp` file (`<title_file>`) the same way; `"$(cat '<title_file>')"` is safe because the shell does not re-evaluate what `cat` prints.
 
 ## Step 6: Report Result
 

@@ -68,9 +68,10 @@ Then choose appropriate labels from the existing repository labels based on the 
 
 ```bash
 mktemp
+mktemp
 ```
 
-Write `<drafted body>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<concise title>` the same way into a second `mktemp` file (`<title_file>`).
+Write `<drafted body>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<concise title>` the same way into the second path (`<title_file>`).
 
 Then run:
 

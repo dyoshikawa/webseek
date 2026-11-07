@@ -3,8 +3,8 @@ name: gpt-pr-reviewer
 targets: ["opencode"]
 description: >-
   Read-only pull request reviewer for the headless `opencode run` call made by
-  the opencode-gpt-review skill. It can only read files in the repository; it
-  cannot run shell commands, edit files, use the network, MCP tools or subagents.
+  the opencode-gpt-review skill. It can only read and glob files in the repository;
+  it cannot grep, run shell commands, edit files, use the network, MCP tools or subagents.
 opencode:
   mode: primary
   permission:
@@ -18,8 +18,9 @@ opencode:
       "*.pem": deny
       "*.key": deny
       "*/.git/*": deny
+      ".git/*": deny
     glob: allow
-    grep: allow
+    grep: deny
     list: allow
     skill: allow
     edit: deny

@@ -63,9 +63,10 @@ Create a new PR:
 
 ```bash
 mktemp
+mktemp
 ```
 
-Write `<description>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<title>` the same way into a second `mktemp` file (`<title_file>`).
+Write `<description>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<title>` the same way into the second path (`<title_file>`).
 
 Then run:
 
@@ -88,9 +89,10 @@ The PR description should include:
 
 ```bash
 mktemp
+mktemp
 ```
 
-Write `<new-description>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell. Write `<new-title>` the same way into a second `mktemp` file (`<title_file>`).
+Write `<new-description>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<new-title>` the same way into the second path (`<title_file>`).
 
 Then run:
 

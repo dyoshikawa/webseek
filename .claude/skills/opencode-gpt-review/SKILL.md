@@ -35,8 +35,10 @@ opencode loads `opencode.json` / `opencode.jsonc` (which can start MCP servers) 
 ```bash
 git fetch -q origin main
 git diff --name-only origin/main -- opencode.json opencode.jsonc .opencode
-git status --porcelain --untracked-files=all -- opencode.json opencode.jsonc .opencode
+git status --porcelain --ignored --untracked-files=all -- opencode.json opencode.jsonc .opencode ':!.opencode/memories'
 ```
+
+`--ignored` matters: `.opencode/agents`, `.opencode/skills` and `.opencode/plugins` are git-ignored, so a stray agent or plugin left over from a PR branch would not show up otherwise.
 
 If it prints anything, run the review from a clean checkout of `main` instead.
 
@@ -46,7 +48,7 @@ The reviewer agent cannot run shell commands, so collect the PR metadata and dif
 
 ```bash
 mkdir -p tmp/opencode-gpt-review
-{ gh pr view '<PR_TARGET>' --json number,url,title,body,author,baseRefName,headRefName,files; echo; gh pr diff '<PR_TARGET>'; } > tmp/opencode-gpt-review/pr.txt
+gh pr view '<PR_TARGET>' --json number,url,title,body,author,baseRefName,headRefName,files > tmp/opencode-gpt-review/pr.txt && echo >> tmp/opencode-gpt-review/pr.txt && gh pr diff '<PR_TARGET>' >> tmp/opencode-gpt-review/pr.txt
 ```
 
 Stop if either `gh` command fails, so the reviewer never gets a partial file.
@@ -64,7 +66,7 @@ opencode run \
   "review-pr-lite スキルの観点と出力形式で、添付した PR (tmp/opencode-gpt-review/pr.txt) をレビューしてください。シェルは使えないので、PR の情報は添付ファイルから読んでください。CI の状態は確認不要です。"
 ```
 
-- `--agent gpt-pr-reviewer`: Run as the read-only reviewer agent (`.opencode/agents/gpt-pr-reviewer.md`). The PR content is untrusted and the run is headless, so this agent denies every tool by default: it can read files in the repository (except `.env`, `.dev.vars`, `.npmrc`, key files and `.git/`) and load skills, and cannot run shell commands, edit files, use the network, MCP tools or subagents. Never drop this flag, and never add `--auto`.
+- `--agent gpt-pr-reviewer`: Run as the read-only reviewer agent (`.opencode/agents/gpt-pr-reviewer.md`). The PR content is untrusted and the run is headless, so this agent denies every tool by default: it can read and glob files in the repository (except `.env`, `.dev.vars`, `.npmrc`, key files and `.git/`) and load skills, and cannot grep (grep would return lines from the files read denies), run shell commands, edit files, use the network, MCP tools or subagents. Never drop this flag, and never add `--auto`.
 - `review-pr-lite`: The reviewer agent may not start subagents (they would not inherit its restrictions), so it uses the single-agent review skill. It cannot check CI; check the PR's GitHub Actions status yourself with `gh pr checks` if needed.
 - `--standalone`: Runs a private server that loads the configuration from this directory now, instead of the shared background service, which may still hold configuration, plugins or MCP servers loaded earlier (for example while a PR branch was checked out).
 - `--file`: Attaches the collected PR metadata and diff.

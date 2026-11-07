@@ -106,6 +106,6 @@ git checkout main && git pull --prune
 git branch -d -- "$branch"
 ```
 
-For a fork PR (`isCrossRepository` is true), do not delete `"$branch"`: the fork's head branch name may match an unrelated local branch of yours. Delete only `pr-<pr_number>` (the local name the `git-worktree-runner` skill uses for fork PRs) with `git branch -d -- 'pr-<pr_number>'`, after removing its worktree with `git gtr rm 'pr-<pr_number>'` if one still exists. Skip a branch that does not exist.
+For a fork PR (`isCrossRepository` is true), do not delete `"$branch"`: the fork's head branch name may match an unrelated local branch of yours. Delete only `pr-<pr_number>` (the local name the `git-worktree-runner` skill uses for fork PRs) with `git branch -d -- 'pr-<pr_number>'`, after removing its worktree with `git gtr rm 'pr-<pr_number>'` if one still exists. For a PR from this repository, do the same for `pr-<pr_number>` too if it exists. Skip a branch that does not exist. If the PR was squash- or rebase-merged, `git branch -d` reports the branch as not fully merged; then confirm the PR is merged and ask the user before using `-D`.
 
 The head branch name is chosen by the PR author (for a fork PR, anyone). Never type it into the command yourself: read it into a variable as above and always use it as `"$branch"`, so the shell never interprets characters in it.

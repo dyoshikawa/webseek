@@ -40,7 +40,7 @@ If the PR cannot be determined (e.g., no PR exists for the current branch, or th
 Before merging, confirm the PR details:
 
 ```bash
-gh pr view <pr_number> --json number,title,state,mergeable,author,baseRefName,headRefName
+gh pr view <pr_number> --json number,title,state,mergeable,author,baseRefName,headRefName,isCrossRepository
 ```
 
 Check:
@@ -98,7 +98,7 @@ After merging:
 
 ## Step 7: Clean Up Local Branch
 
-If the local branch exists, please clean up the local branch. Execute:
+If the local branch exists, please clean up the local branch. For a PR from this repository (`isCrossRepository` is false), execute:
 
 ```bash
 branch="$(gh pr view <pr_number> --json headRefName --jq .headRefName)"
@@ -106,6 +106,6 @@ git checkout main && git pull --prune
 git branch -d -- "$branch"
 ```
 
-If the PR was checked out under `pr-<pr_number>` (the default local name the `git-worktree-runner` skill uses for fork PRs), delete that branch instead: `git branch -d -- 'pr-<pr_number>'`. Skip a branch that does not exist.
+For a fork PR (`isCrossRepository` is true), do not delete `"$branch"`: the fork's head branch name may match an unrelated local branch of yours. Delete only `pr-<pr_number>` (the local name the `git-worktree-runner` skill uses for fork PRs) with `git branch -d -- 'pr-<pr_number>'`, after removing its worktree with `git gtr rm 'pr-<pr_number>'` if one still exists. Skip a branch that does not exist.
 
 The head branch name is chosen by the PR author (for a fork PR, anyone). Never type it into the command yourself: read it into a variable as above and always use it as `"$branch"`, so the shell never interprets characters in it.

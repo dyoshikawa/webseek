@@ -77,7 +77,7 @@ Only if the user explicitly approves force deletion for unmerged branches, use:
 git branch -D -- '<branch-name>'
 ```
 
-Always put the branch name in single quotes after `--`. Branch names can come from other people (for example a local branch named after a fork PR's head branch), so skip and report any branch whose name contains characters other than letters, digits, `.`, `_`, `-` and `/` instead of deleting it.
+Always put the branch name in single quotes after `--`. Branch names can come from other people (for example a local branch named after a fork PR's head branch), so skip and report any branch whose name contains characters other than letters, digits, `.`, `_`, `-` and `/`, or that does not start with a letter or digit, instead of deleting it.
 
 Delete branches one by one, not with a broad wildcard command.
 

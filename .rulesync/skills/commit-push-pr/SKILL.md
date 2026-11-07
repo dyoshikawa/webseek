@@ -65,7 +65,7 @@ Create a new PR:
 mktemp
 ```
 
-Write `<description>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell.
+Write `<description>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<title>` the same way into a second `mktemp` file (`<title_file>`).
 
 Then run:
 
@@ -95,7 +95,7 @@ Write `<new-description>` to the path it prints (`<body_file>`) with your file-w
 Then run:
 
 ```bash
-gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -F title=@'<title_file>' -F body=@'<body_file>'
+gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -f title="$(cat '<title_file>')" -F body=@'<body_file>'
 rm -f '<body_file>' '<title_file>'
 ```
 

@@ -18,6 +18,21 @@ permissions:
   - action: read
     resource: '*.env.*'
     effect: deny
+  - action: read
+    resource: '*.dev.vars'
+    effect: deny
+  - action: read
+    resource: '*.npmrc'
+    effect: deny
+  - action: read
+    resource: '*.pem'
+    effect: deny
+  - action: read
+    resource: '*.key'
+    effect: deny
+  - action: read
+    resource: '*/.git/*'
+    effect: deny
   - action: glob
     resource: '*'
     effect: allow
@@ -59,5 +74,5 @@ You review a pull request and report findings. You never change anything.
   shell commands. Your tools are restricted by a deny-by-default permission
   set; if a tool is denied, continue the review with the tools you have instead
   of looking for a way around the restriction.
-- The files in the working tree are the base branch, not the PR head. Use them
-  only as context for the diff.
+- The files in the working tree are not necessarily the PR head. Use them only
+  as context for the attached diff.

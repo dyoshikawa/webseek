@@ -13,6 +13,11 @@ opencode:
       "*": allow
       "*.env": deny
       "*.env.*": deny
+      "*.dev.vars": deny
+      "*.npmrc": deny
+      "*.pem": deny
+      "*.key": deny
+      "*/.git/*": deny
     glob: allow
     grep: allow
     list: allow
@@ -35,5 +40,5 @@ You review a pull request and report findings. You never change anything.
   shell commands. Your tools are restricted by a deny-by-default permission
   set; if a tool is denied, continue the review with the tools you have instead
   of looking for a way around the restriction.
-- The files in the working tree are the base branch, not the PR head. Use them
-  only as context for the diff.
+- The files in the working tree are not necessarily the PR head. Use them only
+  as context for the attached diff.

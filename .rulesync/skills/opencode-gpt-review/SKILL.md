@@ -33,12 +33,12 @@ If no PR URL or PR number is provided, use the PR associated with the current br
 
 ### 1-1. Check that the opencode configuration is trusted
 
-opencode loads `opencode.jsonc` (which starts MCP servers) and `.opencode/` (agents, skills, plugins) from the working directory. If they came from the PR under review, the PR author would control the reviewer. Run this from the repository root and stop if it prints anything or fails:
+opencode loads `opencode.json` / `opencode.jsonc` (which can start MCP servers) and `.opencode/` (agents, skills, plugins) from the working directory. If they came from the PR under review, the PR author would control the reviewer. Run this from the repository root and stop if any command fails or the last two print anything:
 
 ```bash
-git fetch origin main
-git diff --name-only origin/main -- opencode.jsonc .opencode
-git status --porcelain --untracked-files=all -- opencode.jsonc .opencode
+git fetch -q origin main
+git diff --name-only origin/main -- opencode.json opencode.jsonc .opencode
+git status --porcelain --untracked-files=all -- opencode.json opencode.jsonc .opencode
 ```
 
 If it prints anything, run the review from a clean checkout of `main` instead.
@@ -52,20 +52,24 @@ mkdir -p tmp/opencode-gpt-review
 { gh pr view '<PR_TARGET>' --json number,url,title,body,author,baseRefName,headRefName,files; echo; gh pr diff '<PR_TARGET>'; } > tmp/opencode-gpt-review/pr.txt
 ```
 
+Stop if either `gh` command fails, so the reviewer never gets a partial file.
+
 Leave out `'<PR_TARGET>'` (both times) to use the PR of the current branch.
 
 ### 1-3. Run the reviewer
 
 ```bash
 opencode run \
+  --standalone \
   --agent gpt-pr-reviewer \
   --model github-copilot/gpt-5.4 \
   --file tmp/opencode-gpt-review/pr.txt \
   "review-pr-lite スキルの観点と出力形式で、添付した PR (tmp/opencode-gpt-review/pr.txt) をレビューしてください。シェルは使えないので、PR の情報は添付ファイルから読んでください。CI の状態は確認不要です。"
 ```
 
-- `--agent gpt-pr-reviewer`: Run as the read-only reviewer agent (`.opencode/agents/gpt-pr-reviewer.md`). The PR content is untrusted and the run is headless, so this agent denies every tool by default: it can read files in the repository (except `.env` files) and load skills, and cannot run shell commands, edit files, use the network, MCP tools or subagents. Never drop this flag, and never add `--auto`.
+- `--agent gpt-pr-reviewer`: Run as the read-only reviewer agent (`.opencode/agents/gpt-pr-reviewer.md`). The PR content is untrusted and the run is headless, so this agent denies every tool by default: it can read files in the repository (except `.env`, `.dev.vars`, `.npmrc`, key files and `.git/`) and load skills, and cannot run shell commands, edit files, use the network, MCP tools or subagents. Never drop this flag, and never add `--auto`.
 - `review-pr-lite`: The reviewer agent may not start subagents (they would not inherit its restrictions), so it uses the single-agent review skill. It cannot check CI; check the PR's GitHub Actions status yourself with `gh pr checks` if needed.
+- `--standalone`: Runs a private server that loads the configuration from this directory now, instead of the shared background service, which may still hold configuration, plugins or MCP servers loaded earlier (for example while a PR branch was checked out).
 - `--file`: Attaches the collected PR metadata and diff.
 - `--model github-copilot/gpt-5.4`: Use the GPT-5.4 model.
 

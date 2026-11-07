@@ -177,7 +177,7 @@ Given a PR number or URL:
    gh pr view <PR_NUMBER> --json headRefName,isCrossRepository
    ```
 
-   Pick the local branch name now. The head branch name is chosen by the PR author, so never type it into a command. Name the local branch `pr-<PR_NUMBER>`; use the head branch name only when it contains nothing but letters, digits, `.`, `_`, `-` and `/`, and then only through a variable:
+   Pick the local branch name now. The head branch name is chosen by the PR author, so never type it into a command. Name the local branch `pr-<PR_NUMBER>`; use the head branch name only when it starts with a letter or digit and contains nothing but letters, digits, `.`, `_`, `-` and `/`, and then only through a variable:
 
    ```bash
    branch="pr-<PR_NUMBER>"

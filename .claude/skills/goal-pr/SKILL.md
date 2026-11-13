@@ -88,7 +88,14 @@ on the local branch directly:
    ```bash
    git status
    git add <changed files>
-   git commit -m "<message>"
+   mktemp
+   ```
+
+   Write `<message>` to the path `mktemp` printed (`<msg_file>`) with your file-writing tool, not through the shell (never put it in a double-quoted `-m` argument or a heredoc), then:
+
+   ```bash
+   git commit -F '<msg_file>'
+   rm -f '<msg_file>'
    git push origin HEAD
    ```
 

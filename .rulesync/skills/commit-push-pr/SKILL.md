@@ -24,15 +24,30 @@ If the current branch is `main` or `master`:
 1. Run `git status` to check for changes
 2. If there are unstaged changes, stage them: `git add .`
 3. Analyze the changes and create a meaningful commit message
-4. Commit with: `git commit -m "<commit-message>"`
+4. Commit with the message passed through a file, never inside double quotes:
+
+   ```bash
+   mktemp
+   ```
+
+   Write `<commit-message>` to the path it prints (`<msg_file>`) with your file-writing tool, not through the shell.
+
+   Then run:
+
+   ```bash
+   git commit -F '<msg_file>'
+   rm -f '<msg_file>'
+   ```
 
 ## Step 3: Push to Remote
 
 Push the branch to remote with upstream tracking:
 
 ```bash
-git push -u origin <branch-name>
+git push -u origin HEAD
 ```
+
+`HEAD` pushes the current branch under its own name, so the branch name never has to be typed into the command.
 
 ## Step 4: Handle Pull Request
 
@@ -47,8 +62,20 @@ gh pr view --json number,title,body 2>/dev/null
 Create a new PR:
 
 ```bash
-gh pr create --title "<title>" --body "<description>"
+mktemp
+mktemp
 ```
+
+Write `<description>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<title>` the same way into the second path (`<title_file>`).
+
+Then run:
+
+```bash
+gh pr create --title "$(cat '<title_file>')" --body-file '<body_file>'
+rm -f '<body_file>' '<title_file>'
+```
+
+Never put drafted text on the command line or in a shell heredoc: it often quotes untrusted issue or PR content, the shell runs backticks and `$(...)` inside double quotes, and a quoted line can end a heredoc early. Create an empty file with `mktemp`, write the text into it with your file-writing tool (not through the shell), and pass the file. Write the title into its own `mktemp` file (`<title_file>`) the same way; `"$(cat '<title_file>')"` is safe because the shell does not re-evaluate what `cat` prints.
 
 The PR description should include:
 
@@ -61,7 +88,17 @@ The PR description should include:
 2. If updates are needed (e.g., scope of changes has expanded), update the PR using GitHub API:
 
 ```bash
-gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -f title="<new-title>" -f body="<new-description>"
+mktemp
+mktemp
+```
+
+Write `<new-description>` to the first path it prints (`<body_file>`) with your file-writing tool, not through the shell, and `<new-title>` the same way into the second path (`<title_file>`).
+
+Then run:
+
+```bash
+gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -f title="$(cat '<title_file>')" -F body=@'<body_file>'
+rm -f '<body_file>' '<title_file>'
 ```
 
 Note: Use `gh api` instead of `gh pr edit` to avoid GraphQL deprecation warnings. 3. If no updates are needed, skip this step

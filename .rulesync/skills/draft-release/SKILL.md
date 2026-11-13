@@ -38,10 +38,24 @@ draft GitHub release for the maintainer to review and merge.
 
 ## Step 4: Open the release PR
 
-- Create a PR into `main`:
-  `gh pr create --base main --head release/v${new_version} --title "chore(release): ${new_version}" --body "<summary>"`.
+- Create a PR into `main`, passing the body through a file:
+
+  ```bash
+  mktemp
+  ```
+
+  Write `<summary>` to the path it prints (`<body_file>`) with your file-writing tool, not through the shell.
+
+  Then run:
+
+  ```bash
+  gh pr create --base main --head "release/v${new_version}" --title "chore(release): ${new_version}" --body-file '<body_file>'
+  rm -f '<body_file>'
+  ```
+
 - Use the change summary from the `release-dry-run` skill (What's Changed, Full Changelog)
-  for the PR body.
+  for the PR body. It quotes contributors' PR titles, so never put it inside double quotes
+  on the command line: the shell runs backticks and `$(...)` found inside double quotes.
 
 ## Step 5: Create the draft GitHub release
 
